@@ -60,9 +60,9 @@ mod tests {
     use super::*;
     #[test]
     fn echo_solution() {
-        let checker = DefaultChecker::new("tee");
+        let checker = DefaultChecker::new("cat");
 
-        let my_prog = Solver::new("tee");
+        let my_prog = Solver::new("cat");
 
         for i in 0..100 {
             let testcase = TestCase::new(i, i.to_string());
@@ -76,9 +76,9 @@ mod tests {
 
     #[test]
     fn no_newline() {
-        let checker = DefaultChecker::new("tee");
+        let checker = DefaultChecker::new("cat");
 
-        let my_prog = Solver::new("tee");
+        let my_prog = Solver::new("cat");
 
         for i in 0..100 {
             let testcase = TestCase::new(i, format!("{i}\n"));
@@ -92,9 +92,9 @@ mod tests {
 
     #[test]
     fn minus_one() {
-        let checker = DefaultChecker::new("tee");
+        let checker = DefaultChecker::new("cat");
 
-        let my_prog = Solver::new("tee");
+        let my_prog = Solver::new("cat");
 
         for i in 1..100 {
             let testcase = TestCase::new(i, format!("{}\n",  i.to_string()));

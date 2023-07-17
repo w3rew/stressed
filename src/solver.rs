@@ -41,7 +41,7 @@ mod tests {
     use std::fmt;
     #[test]
     fn echo_solver() {
-        let solver = Solver::new("tee");
+        let solver = Solver::new("cat");
 
         for i in 0..100 {
             let mut i_string = format!("{i}\n");
