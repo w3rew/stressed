@@ -24,15 +24,14 @@ impl fmt::Display for CompareError {
         writeln!(f, "{}{}{}", "Testcase (seed = ".bold(), self.testcase.seed, ")".bold())?;
         write!(f, "{}", &self.testcase.body)?;
         writeln!(f, "{DELIMITER_STR}")?;
-        write!(f, "{}", "Correct answer:".bold())?;
-        writeln!(f, "{}", &self.correct_answer)?;
+        writeln!(f, "{}", "Correct answer:".bold())?;
+        write!(f, "{}", &self.correct_answer)?;
         write!(f, "{DELIMITER_STR}")?;
         writeln!(f, "{}", "Given answer:".bold())?;
 
         for text in self.my_answer.iter() {
             write!(f, "{}", text)?;
         }
-        write!(f, "\n")?;
 
         Ok(())
     }

@@ -3,31 +3,37 @@ mod utils;
 mod sampler;
 mod solver;
 mod checker;
+mod runner;
 
 use crate::args::parse_args;
 use crate::sampler::Sampler;
 use crate::solver::Solver;
-use crate::checker::{Check, DefaultChecker};
-use crate::utils::TestCase;
+use crate::checker::{Check, DefaultChecker, CustomChecker};
+use crate::utils::SeedType;
+use crate::runner::run_sequence;
 
 fn main() {
     let args = parse_args();
 
-    let mut sample = String::new();
-    if let Err(_) = std::io::stdin().read_line(&mut sample) {
-        panic!("Something went wrong.");
-    }
+    let sampler = Sampler::new(args.sampler_path);
+    let prog = Solver::new(args.solver_path);
 
-    let sample = TestCase::new(123, sample);
+    let checker: Box<dyn Check> = match (args.checker.default, args.checker.custom) {
+        (Some(ref reference_path), None) => Box::new(DefaultChecker::from(reference_path)),
+        (None, Some(ref checker_path)) => Box::new(CustomChecker::from(checker_path)),
+        _ => unreachable!("Wrong checker/reference argument combination")
+    };
 
-    let prog = Solver::new("./test_prog");
-    let checker: Box<dyn Check> = Box::new(DefaultChecker::new("./reference_prog"));
+    let result = run_sequence(&sampler,
+                              &prog,
+                              &*checker,
+                              SeedType::MIN,
+                              1);
 
-    let out = prog.interact(&sample.body);
-
-    match checker.check(&sample, &out) {
-        Ok(_) => println!("Ok!"),
-        Err(e) => print!("{e}")
+    if let Err(display) = result {
+        print!("{display}");
+    } else {
+        println!("Tests passed!");
     }
 
 }

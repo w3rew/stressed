@@ -8,8 +8,8 @@ pub struct Sampler {
 }
 
 impl Sampler {
-    pub fn new(executable: &str) -> Sampler {
-        Sampler{executable: PathBuf::from(executable)}
+    pub fn new(executable: PathBuf) -> Sampler {
+        Sampler{executable}
     }
 
     pub fn sample(&self, seed: SeedType) -> String {
@@ -25,12 +25,18 @@ impl Sampler {
     }
 }
 
+impl<T> From<T> for Sampler where PathBuf: From<T> {
+    fn from (value: T) -> Sampler {
+        Sampler::new(PathBuf::from(value))
+    }
+}
+
 #[cfg(all(target_os = "linux", test))]
 mod tests {
     use super::*;
     #[test]
     fn echo_sampler() {
-        let echo_sampler = Sampler::new("echo");
+        let echo_sampler = Sampler::from("echo");
         for i in 0..100 {
             let ans = echo_sampler.sample(i as SeedType);
             println!("{i} {ans}");

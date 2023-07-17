@@ -3,7 +3,7 @@ use crate::solver::Solver;
 use crate::utils::{TestCase, CompareError};
 use std::result::Result;
 use similar::{ChangeTag, TextDiff};
-use colored::{ColoredString, Colorize};
+use colored::Colorize;
 use std::fmt::Display;
 
 pub struct DefaultChecker {
@@ -11,12 +11,15 @@ pub struct DefaultChecker {
 }
 
 impl DefaultChecker {
-    pub fn from_solver(reference_solver: Solver) -> DefaultChecker {
+    pub fn new(reference_solver: Solver) -> DefaultChecker {
         DefaultChecker{reference_solver}
     }
 
-    pub fn new(reference_executable: &str) -> DefaultChecker {
-        DefaultChecker::from_solver(Solver::new(reference_executable))
+}
+
+impl<T> From<T> for DefaultChecker where Solver: From<T> {
+    fn from(val: T) -> DefaultChecker {
+        DefaultChecker::new(Solver::from(val))
     }
 }
 
@@ -60,9 +63,9 @@ mod tests {
     use super::*;
     #[test]
     fn echo_solution() {
-        let checker = DefaultChecker::new("cat");
+        let checker = DefaultChecker::from("cat");
 
-        let my_prog = Solver::new("cat");
+        let my_prog = Solver::from("cat");
 
         for i in 0..100 {
             let testcase = TestCase::new(i, i.to_string());
@@ -76,9 +79,9 @@ mod tests {
 
     #[test]
     fn no_newline() {
-        let checker = DefaultChecker::new("cat");
+        let checker = DefaultChecker::from("cat");
 
-        let my_prog = Solver::new("cat");
+        let my_prog = Solver::from("cat");
 
         for i in 0..100 {
             let testcase = TestCase::new(i, format!("{i}\n"));
@@ -92,9 +95,9 @@ mod tests {
 
     #[test]
     fn minus_one() {
-        let checker = DefaultChecker::new("cat");
+        let checker = DefaultChecker::from("cat");
 
-        let my_prog = Solver::new("cat");
+        let my_prog = Solver::from("cat");
 
         for i in 1..100 {
             let testcase = TestCase::new(i, format!("{}\n",  i.to_string()));

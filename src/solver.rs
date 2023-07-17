@@ -8,9 +8,10 @@ pub struct Solver {
 }
 
 impl Solver {
-    pub fn new(executable: &str) -> Solver {
-        Solver{executable: PathBuf::from(executable)}
+    pub fn new(executable: PathBuf) -> Solver {
+        Solver{executable}
     }
+
     pub fn interact(&self, s: &str) -> String {
         let prog = match Command::new(&self.executable)
                                   .stdin(Stdio::piped())
@@ -35,13 +36,19 @@ impl Solver {
     }
 }
 
+impl<T> From<T> for Solver where PathBuf: From<T> {
+    fn from(value: T) -> Solver {
+        Solver::new(PathBuf::from(value))
+    }
+}
+
 #[cfg(all(target_os = "linux", test))]
 mod tests {
     use super::*;
     use std::fmt;
     #[test]
     fn echo_solver() {
-        let solver = Solver::new("cat");
+        let solver = Solver::from("cat");
 
         for i in 0..100 {
             let mut i_string = format!("{i}\n");
