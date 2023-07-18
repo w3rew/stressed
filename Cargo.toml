@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.3.12", features = ["derive"] }
 colored = "2.0.4"
+indicatif = "0.17.5"
 similar = "2.2.1"

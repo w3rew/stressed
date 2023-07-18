@@ -27,7 +27,11 @@ impl Check for DefaultChecker {
     fn check(&self, testcase: &TestCase, answer: &str) -> Result<(), Box<dyn Display>> {
         let correct_answer = self.reference_solver.interact(&testcase.body);
 
-        build_error(testcase, &correct_answer, answer)
+        if correct_answer == answer {
+            Ok(())
+        } else {
+            build_error(testcase, &correct_answer, answer)
+        }
     }
 }
 
@@ -52,6 +56,7 @@ fn build_error(testcase: &TestCase,
     }
 
     if !seen_change {
+        unreachable!("Shouldn't have called this function");
         return Result::Ok(());
     }
     let log = CompareError::new(testcase.clone(), String::from(correct_answer), ans);

@@ -17,6 +17,9 @@ pub struct Args {
 
     #[arg(short, long)]
     pub progress: bool,
+
+    #[arg(short = 'n', long = "niter", default_value_t = 1000000)]
+    pub niter: usize,
 }
 
 #[derive(Debug, clap::Args)]

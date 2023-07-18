@@ -28,10 +28,11 @@ fn main() {
                               &prog,
                               &*checker,
                               SeedType::MIN,
-                              1);
+                              args.niter,
+                              args.progress);
 
     if let Err(display) = result {
-        print!("{display}");
+        eprint!("{display}");
     } else {
         println!("Tests passed!");
     }
