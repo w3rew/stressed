@@ -5,9 +5,15 @@ use crate::utils::TestCase;
 use std::result::Result;
 use std::fmt;
 
+use async_trait::async_trait;
+
 pub use default_checker::DefaultChecker;
 pub use custom_checker::CustomChecker;
 
+#[async_trait]
 pub trait Check {
-    fn check(&self, input: &TestCase, answer: &str) -> Result<(), Box<dyn fmt::Display>>;
+    async fn check(&self, input: &TestCase, answer: &str) -> Result<(), Box<dyn fmt::Display>>;
 }
+
+pub trait Checker: Sync + Check {}
+impl<T> Checker for T where T: Sync + Check {}

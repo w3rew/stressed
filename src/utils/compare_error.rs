@@ -26,7 +26,7 @@ impl fmt::Display for CompareError {
         writeln!(f, "{DELIMITER_STR}")?;
         writeln!(f, "{}", "Correct answer:".bold())?;
         write!(f, "{}", &self.correct_answer)?;
-        write!(f, "{DELIMITER_STR}")?;
+        writeln!(f, "{DELIMITER_STR}")?;
         writeln!(f, "{}", "Given answer:".bold())?;
 
         for text in self.my_answer.iter() {

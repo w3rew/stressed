@@ -1,6 +1,8 @@
 use std::path::PathBuf;
-use std::process::Command;
+use tokio::process::Command;
 use crate::utils::{SeedType, ensure_newline};
+use std::process::Stdio;
+use std::os::fd::AsFd;
 
 
 pub struct Sampler {
@@ -12,16 +14,19 @@ impl Sampler {
         Sampler{executable}
     }
 
-    pub fn sample(&self, seed: SeedType) -> String {
-        let bytes = Command::new(&self.executable)
-                              .arg(seed.to_string())
-                              .output()
-                              .expect("Could not run sampler")
-                              .stdout;
+    pub async fn sample(&self, seed: SeedType) -> String {
+        let mut command = Command::new(&self.executable);
+        command.stdin(Stdio::null()).stderr(Stdio::null()).stdout(Stdio::piped());
+        let prog = match command.spawn() {
+            Err(why) => panic!("Couldn't spawn sampler process: {why}"),
+            Ok(prog) => prog,
+        };
+        drop(command);
+        let output = prog.wait_with_output().await.expect("Could not sample");
 
-        let mut ans = String::from_utf8(bytes).expect("Could not decode sampler output");
-        ensure_newline(&mut ans);
-        ans
+        let mut testcase = String::from_utf8(output.stdout).expect("Could not decode sampler output");
+        ensure_newline(&mut testcase);
+        testcase
     }
 }
 

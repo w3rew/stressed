@@ -1,7 +1,8 @@
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
-use std::io::{Read, Write};
+use tokio::process::Command;
+use std::process::Stdio;
 use crate::utils::ensure_newline;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub struct Solver {
     executable: PathBuf,
@@ -12,27 +13,27 @@ impl Solver {
         Solver{executable}
     }
 
-    pub fn interact(&self, s: &str) -> String {
-        let prog = match Command::new(&self.executable)
-                                  .stdin(Stdio::piped())
-                                  .stdout(Stdio::piped())
-                                  .spawn() {
-                                      Err(why) => panic!("Couldn't spawn solution process: {why}"),
-                                      Ok(prog) => prog,
-                                  };
+    pub async fn interact(&self, s: &str) -> String {
+        let mut command = Command::new(&self.executable);
+        command
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null());
+        let mut prog = match command.spawn() {
+                Err(why) => panic!("Couldn't spawn solution process: {why}"),
+                Ok(prog) => prog,
+            };
+        drop(command);
 
-        if let Err(why) = prog.stdin.unwrap().write_all(s.as_bytes()) {
-            panic!("Couldn't write sample to solution: {why}");
-        }
+        let mut stdin = prog.stdin.take().unwrap();
+        stdin.write(s.as_bytes()).await.unwrap();
+        drop(stdin);
 
-        let mut output = String::new();
+        let output = prog.wait_with_output().await.expect("Could not solve using solver").stdout;
+        let mut answer = String::from_utf8(output).expect("Could not decode sampler output");
 
-        if let Err(why) = prog.stdout.unwrap().read_to_string(&mut output) {
-            panic!("Could not read response from solution: {why}");
-        }
-
-        ensure_newline(&mut output);
-        output
+        ensure_newline(&mut answer);
+        answer
     }
 }
 

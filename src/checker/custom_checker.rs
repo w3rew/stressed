@@ -2,6 +2,7 @@ use crate::checker::Check;
 use std::fmt;
 use crate::utils::TestCase;
 use std::path::PathBuf;
+use async_trait::async_trait;
 
 pub struct CustomChecker {
     checker: PathBuf,
@@ -19,8 +20,9 @@ impl<T> From<T> for CustomChecker where PathBuf: From<T> {
     }
 }
 
+#[async_trait]
 impl Check for CustomChecker {
-    fn check(&self, input: &TestCase, answer: &str) -> Result<(), Box<dyn fmt::Display>> {
+    async fn check(&self, input: &TestCase, answer: &str) -> Result<(), Box<dyn fmt::Display>> {
         unreachable!("Unimplemented");
     }
 }

@@ -6,6 +6,8 @@ use similar::{ChangeTag, TextDiff};
 use colored::Colorize;
 use std::fmt::Display;
 
+use async_trait::async_trait;
+
 pub struct DefaultChecker {
     reference_solver: Solver,
 }
@@ -23,9 +25,10 @@ impl<T> From<T> for DefaultChecker where Solver: From<T> {
     }
 }
 
+#[async_trait]
 impl Check for DefaultChecker {
-    fn check(&self, testcase: &TestCase, answer: &str) -> Result<(), Box<dyn Display>> {
-        let correct_answer = self.reference_solver.interact(&testcase.body);
+    async fn check(&self, testcase: &TestCase, answer: &str) -> Result<(), Box<dyn Display>> {
+        let correct_answer = self.reference_solver.interact(&testcase.body).await;
 
         if correct_answer == answer {
             Ok(())
@@ -57,7 +60,6 @@ fn build_error(testcase: &TestCase,
 
     if !seen_change {
         unreachable!("Shouldn't have called this function");
-        return Result::Ok(());
     }
     let log = CompareError::new(testcase.clone(), String::from(correct_answer), ans);
     Result::Err(Box::new(log))
