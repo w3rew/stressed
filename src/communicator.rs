@@ -55,12 +55,12 @@ impl<T> From<T> for Communicator where PathBuf: From<T> {
 mod tests {
     use super::*;
     #[tokio::test]
-    async fn echo_solver() {
-        let solver = Communicator::from("cat");
+    async fn echo_communicator() {
+        let c = Communicator::from("cat");
 
         for i in 0..100 {
             let i_string = format!("{i}\n");
-            let ans = solver.communicate(Some(&i_string), None).await;
+            let ans = c.communicate(Some(&i_string), None).await;
             assert_eq!(ans, i_string);
         }
     }

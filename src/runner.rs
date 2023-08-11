@@ -52,7 +52,6 @@ pub async fn run_sequence(generator: &Sampler,
             drop(permit);
 
             if let Err(e) = result {
-                println!("err");
                 Err(e)
             }
             else {

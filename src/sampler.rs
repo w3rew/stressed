@@ -21,3 +21,27 @@ impl Sampler {
         }
     }
 }
+
+#[cfg(all(target_os = "linux", test))]
+mod tests {
+    use super::*;
+    #[tokio::test]
+    async fn seed_as_arg() {
+        let arg_sampler = Sampler::new(PathBuf::from("echo"), false);
+        for seed in 0..100 {
+            let ans = arg_sampler.sample(seed as SeedType).await;
+            let correct_ans = format!("{seed}\n");
+            let incorrect_ans = format!("{}\n", seed + 1);
+            assert_eq!(ans, correct_ans);
+            assert_ne!(ans, incorrect_ans);
+        }
+    }
+    async fn seed_as_stdin() {
+        let arg_sampler = Sampler::new(PathBuf::from("cat"), true);
+        for seed in 0..100 {
+            let ans = arg_sampler.sample(seed as SeedType).await;
+            let correct_ans = format!("{seed}\n");
+            assert_eq!(ans, correct_ans);
+        }
+    }
+}
