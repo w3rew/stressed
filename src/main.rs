@@ -3,17 +3,22 @@ mod utils;
 mod checker;
 mod communicator;
 mod runner;
+mod sampler;
 
-use crate::args::parse_args;
+use crate::args::{parse_args, SamplerInput};
 use crate::communicator::Communicator;
 use crate::checker::{Checker, DefaultChecker, CustomChecker};
 use crate::runner::run_sequence;
+use crate::sampler::Sampler;
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() {
     let args = parse_args();
 
-    let sampler = Communicator::new(args.sampler_path);
+    let sampler = match args.sampler_input {
+        SamplerInput::Arg => Sampler::new(args.sampler_path, false),
+        SamplerInput::Stdin => Sampler::new(args.sampler_path, true),
+    };
     let prog = Communicator::new(args.solver_path);
 
     let checker: Box<dyn Checker> = match (args.checker.default, args.checker.custom) {

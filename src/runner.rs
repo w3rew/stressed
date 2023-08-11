@@ -1,6 +1,7 @@
 use crate::utils::{SeedType, TestCase};
 use crate::checker::Checker;
 use crate::Communicator;
+use crate::Sampler;
 use indicatif::ProgressBar;
 use std::fmt;
 use futures::prelude::*;
@@ -8,9 +9,9 @@ use futures::stream::FuturesUnordered;
 use tokio::sync::Semaphore;
 
 const WORKERS_PERMITS: usize = 32;
-const BAR_STEP: usize = 10;
+const BAR_STEP: usize = 20;
 
-pub async fn run_sequence(generator: &Communicator,
+pub async fn run_sequence(generator: &Sampler,
                           prog: &Communicator,
                           checker: &dyn Checker,
                           niter: usize,
@@ -45,8 +46,7 @@ pub async fn run_sequence(generator: &Communicator,
         let checker = &checker;
         futs.push(async move {
             let permit = fds_semaphore_ref.acquire().await.unwrap();
-            let cur_seed_string = cur_seed.to_string();
-            let sample = generator.communicate(None, Some(&[&cur_seed_string])).await;
+            let sample = generator.sample(cur_seed).await;
             let testcase = TestCase::new(cur_seed, sample);
             let answer = prog.communicate(Some(&testcase.body), None).await;
             let result = checker.check(&testcase, &answer).await;

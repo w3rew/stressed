@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use tokio::process::Command;
 use std::process::Stdio;
 use crate::utils::ensure_newline;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::AsyncWriteExt;
 
 pub struct Communicator {
     executable: PathBuf,
