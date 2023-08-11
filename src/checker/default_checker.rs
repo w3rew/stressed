@@ -5,23 +5,19 @@ use std::result::Result;
 use similar::{ChangeTag, TextDiff};
 use colored::Colorize;
 use std::fmt::Display;
+use std::path::PathBuf;
 
 use async_trait::async_trait;
 
 pub struct DefaultChecker {
     reference_solver: Communicator,
+    line_diff: bool
 }
 
 impl DefaultChecker {
-    pub fn new(reference_solver: Communicator) -> DefaultChecker {
-        DefaultChecker{reference_solver}
-    }
-
-}
-
-impl<T> From<T> for DefaultChecker where Communicator: From<T> {
-    fn from(val: T) -> DefaultChecker {
-        DefaultChecker::new(Communicator::from(val))
+    pub fn new(reference_solver: PathBuf, line_diff: bool) -> DefaultChecker {
+        DefaultChecker{reference_solver: Communicator::new(reference_solver),
+                       line_diff}
     }
 }
 
@@ -33,17 +29,22 @@ impl Check for DefaultChecker {
         if correct_answer == answer {
             Ok(())
         } else {
-            build_error(testcase, &correct_answer, answer)
+            build_error(testcase, &correct_answer, answer, self.line_diff)
         }
     }
 }
 
 fn build_error(testcase: &TestCase,
                correct_answer: &str,
-               my_answer: &str) -> Result<(), Box<dyn Display>> {
+               my_answer: &str,
+               line_diff: bool) -> Result<(), Box<dyn Display>> {
     let mut ans = Vec::new();
 
-    let diff = TextDiff::from_chars(correct_answer, my_answer);
+    let diff = if line_diff {
+        TextDiff::from_lines(correct_answer, my_answer)
+    } else {
+        TextDiff::from_chars(correct_answer, my_answer)
+    };
 
     let mut seen_change = false;
 
@@ -70,9 +71,9 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn echo_solution() {
-        let checker = DefaultChecker::from("cat");
+        let checker = DefaultChecker::new(PathBuf::from("cat"), false);
 
-        let my_prog = Communicator::from("cat");
+        let my_prog = Communicator::new(PathBuf::from("cat"));
 
         for i in 0..100 {
             let testcase = TestCase::new(i, i.to_string());
@@ -86,8 +87,8 @@ mod tests {
 
     #[tokio::test]
     async fn no_newline() {
-        let checker = DefaultChecker::from("cat");
-        let my_prog = Communicator::from("cat");
+        let checker = DefaultChecker::new(PathBuf::from("cat"), false);
+        let my_prog = Communicator::new(PathBuf::from("cat"));
 
         for i in 0..100 {
             let testcase = TestCase::new(i, format!("{i}\n"));
@@ -101,7 +102,7 @@ mod tests {
 
     #[tokio::test]
     async fn minus_one() {
-        let checker = DefaultChecker::from("cat");
+        let checker = DefaultChecker::new(PathBuf::from("cat"), false);
 
         for i in 1..100 {
             let testcase = TestCase::new(i, format!("{}\n",  i.to_string()));

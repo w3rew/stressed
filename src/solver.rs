@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 use crate::communicator::Communicator;
-use crate::utils::SeedType;
 
 pub struct Solver {
     c: Communicator,

@@ -36,6 +36,7 @@ mod tests {
             assert_ne!(ans, incorrect_ans);
         }
     }
+    #[tokio::test]
     async fn seed_as_stdin() {
         let arg_sampler = Sampler::new(PathBuf::from("cat"), true);
         for seed in 0..100 {
