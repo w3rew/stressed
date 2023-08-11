@@ -10,11 +10,9 @@ use crate::sampler::Sampler;
 use crate::solver::Solver;
 use crate::checker::{Checker, DefaultChecker, CustomChecker};
 use crate::runner::run_sequence;
-use std::process;
 
-#[tokio::main(flavor = "current_thread")]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() {
-    // println!("{}", process::id());
     let args = parse_args();
 
     let sampler = Sampler::new(args.sampler_path);

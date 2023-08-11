@@ -6,8 +6,9 @@ use indicatif::ProgressBar;
 use std::fmt;
 use futures::prelude::*;
 use futures::stream::FuturesUnordered;
+use tokio::sync::Semaphore;
 
-const WORKERS_BUF_SIZE: usize = 32;
+const WORKERS_PERMITS: usize = 200;
 const BAR_STEP: usize = 10;
 
 pub async fn run_sequence(generator: &Sampler,
@@ -20,25 +21,29 @@ pub async fn run_sequence(generator: &Sampler,
         false => ProgressBar::hidden()
     };
 
-    let (task_tx, task_rx) = async_channel::bounded(WORKERS_BUF_SIZE);
+    let mut seed = SeedType::MIN;
 
     let mut futs = FuturesUnordered::new();
 
-    tokio::spawn(async move {
-        let mut seed = SeedType::MIN;
-        for _ in 0..niter {
-            task_tx.send(seed).await;
-            seed += 1;
-        }
-    });
+    let fds_semaphore = Semaphore::new(WORKERS_PERMITS);
+    let fds_semaphore_ptr = &fds_semaphore as *const Semaphore;
+    let fds_semaphore_ref: &'static Semaphore = unsafe {
+        std::mem::transmute::<*const Semaphore, &'static Semaphore>(fds_semaphore_ptr)
+    };
 
     for _ in 0..niter {
-        futs.push(async {
-            let seed = task_rx.recv().await.unwrap();
-            let sample = generator.sample(seed).await;
-            let testcase = TestCase::new(seed, sample);
+        let cur_seed = seed.clone();
+        let generator = &generator;
+        let prog = &prog;
+        let checker = &checker;
+        futs.push(async move {
+            let permit = fds_semaphore_ref.acquire().await.unwrap();
+            let sample = generator.sample(cur_seed).await;
+            let testcase = TestCase::new(cur_seed, sample);
             let answer = prog.interact(&testcase.body).await;
             let result = checker.check(&testcase, &answer).await;
+            drop(permit);
+
             if let Err(e) = result {
                 println!("err");
                 Err(e)
@@ -47,6 +52,7 @@ pub async fn run_sequence(generator: &Sampler,
                 Ok(())
             }
         });
+        seed += 1;
     }
 
     let mut completed: usize = 0;
@@ -69,5 +75,6 @@ pub async fn run_sequence(generator: &Sampler,
             },
         }
     }
+    drop(futs);
     unreachable!()
 }
