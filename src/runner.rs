@@ -1,21 +1,20 @@
 use crate::utils::{SeedType, TestCase};
 use crate::checker::Checker;
-use crate::sampler::Sampler;
-use crate::solver::Solver;
+use crate::Communicator;
 use indicatif::ProgressBar;
 use std::fmt;
 use futures::prelude::*;
 use futures::stream::FuturesUnordered;
 use tokio::sync::Semaphore;
 
-const WORKERS_PERMITS: usize = 200;
+const WORKERS_PERMITS: usize = 32;
 const BAR_STEP: usize = 10;
 
-pub async fn run_sequence(generator: &Sampler,
-                    prog: &Solver,
-                    checker: &dyn Checker,
-                    niter: usize,
-                    progress: bool) -> Result<(), Box<dyn fmt::Display>> {
+pub async fn run_sequence(generator: &Communicator,
+                          prog: &Communicator,
+                          checker: &dyn Checker,
+                          niter: usize,
+                          progress: bool) -> Result<(), Box<dyn fmt::Display>> {
     let bar = match progress {
         true => ProgressBar::new(niter.try_into().unwrap()),
         false => ProgressBar::hidden()
@@ -25,6 +24,14 @@ pub async fn run_sequence(generator: &Sampler,
 
     let mut futs = FuturesUnordered::new();
 
+    // Here we have a semaphore, which does not allow more than
+    // WORKERS_PERMITS threads to be in section, where file desctiptors
+    // are allocated. This helps the program to progress and makes sure that
+    // file descriptor limit is not hit.
+    //
+    // The common decision to make sure the semaphore is accessible to all fibers is
+    // Arc. However, in this case we know that the main fiber awaits all its child
+    // fibers, so the lifetime is correct. That's why the hackery with transmute is safe.
     let fds_semaphore = Semaphore::new(WORKERS_PERMITS);
     let fds_semaphore_ptr = &fds_semaphore as *const Semaphore;
     let fds_semaphore_ref: &'static Semaphore = unsafe {
@@ -38,9 +45,10 @@ pub async fn run_sequence(generator: &Sampler,
         let checker = &checker;
         futs.push(async move {
             let permit = fds_semaphore_ref.acquire().await.unwrap();
-            let sample = generator.sample(cur_seed).await;
+            let cur_seed_string = cur_seed.to_string();
+            let sample = generator.communicate(None, Some(&[&cur_seed_string])).await;
             let testcase = TestCase::new(cur_seed, sample);
-            let answer = prog.interact(&testcase.body).await;
+            let answer = prog.communicate(Some(&testcase.body), None).await;
             let result = checker.check(&testcase, &answer).await;
             drop(permit);
 
@@ -75,6 +83,5 @@ pub async fn run_sequence(generator: &Sampler,
             },
         }
     }
-    drop(futs);
     unreachable!()
 }

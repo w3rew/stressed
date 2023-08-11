@@ -1,5 +1,5 @@
 use crate::checker::Check;
-use crate::solver::Solver;
+use crate::communicator::Communicator;
 use crate::utils::{TestCase, CompareError};
 use std::result::Result;
 use similar::{ChangeTag, TextDiff};
@@ -9,26 +9,26 @@ use std::fmt::Display;
 use async_trait::async_trait;
 
 pub struct DefaultChecker {
-    reference_solver: Solver,
+    reference_solver: Communicator,
 }
 
 impl DefaultChecker {
-    pub fn new(reference_solver: Solver) -> DefaultChecker {
+    pub fn new(reference_solver: Communicator) -> DefaultChecker {
         DefaultChecker{reference_solver}
     }
 
 }
 
-impl<T> From<T> for DefaultChecker where Solver: From<T> {
+impl<T> From<T> for DefaultChecker where Communicator: From<T> {
     fn from(val: T) -> DefaultChecker {
-        DefaultChecker::new(Solver::from(val))
+        DefaultChecker::new(Communicator::from(val))
     }
 }
 
 #[async_trait]
 impl Check for DefaultChecker {
     async fn check(&self, testcase: &TestCase, answer: &str) -> Result<(), Box<dyn Display>> {
-        let correct_answer = self.reference_solver.interact(&testcase.body).await;
+        let correct_answer = self.reference_solver.communicate(Some(&testcase.body), None).await;
 
         if correct_answer == answer {
             Ok(())
@@ -72,12 +72,12 @@ mod tests {
     fn echo_solution() {
         let checker = DefaultChecker::from("cat");
 
-        let my_prog = Solver::from("cat");
+        let my_prog = Communicator::from("cat");
 
         for i in 0..100 {
             let testcase = TestCase::new(i, i.to_string());
 
-            let my_ans = my_prog.interact(&testcase.body);
+            let my_ans = my_prog.communicate(Some(&testcase.body), None);
             let checked = checker.check(&testcase, &my_ans);
 
             assert!(matches!(checked, Ok(())));
@@ -88,12 +88,12 @@ mod tests {
     fn no_newline() {
         let checker = DefaultChecker::from("cat");
 
-        let my_prog = Solver::from("cat");
+        let my_prog = Communicator::from("cat");
 
         for i in 0..100 {
             let testcase = TestCase::new(i, format!("{i}\n"));
 
-            let mut my_ans = my_prog.interact(&testcase.body);
+            let mut my_ans = my_prog.communicate(Some(&testcase.body), None);
             let checked = checker.check(&testcase, &my_ans);
 
             assert!(matches!(checked, Ok(())));
@@ -104,7 +104,7 @@ mod tests {
     fn minus_one() {
         let checker = DefaultChecker::from("cat");
 
-        let my_prog = Solver::from("cat");
+        let my_prog = Communicator::from("cat");
 
         for i in 1..100 {
             let testcase = TestCase::new(i, format!("{}\n",  i.to_string()));

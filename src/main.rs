@@ -1,13 +1,11 @@
 mod args;
 mod utils;
-mod sampler;
-mod solver;
 mod checker;
+mod communicator;
 mod runner;
 
 use crate::args::parse_args;
-use crate::sampler::Sampler;
-use crate::solver::Solver;
+use crate::communicator::Communicator;
 use crate::checker::{Checker, DefaultChecker, CustomChecker};
 use crate::runner::run_sequence;
 
@@ -15,8 +13,8 @@ use crate::runner::run_sequence;
 async fn main() {
     let args = parse_args();
 
-    let sampler = Sampler::new(args.sampler_path);
-    let prog = Solver::new(args.solver_path);
+    let sampler = Communicator::new(args.sampler_path);
+    let prog = Communicator::new(args.solver_path);
 
     let checker: Box<dyn Checker> = match (args.checker.default, args.checker.custom) {
         (Some(ref reference_path), None) => Box::new(DefaultChecker::from(reference_path)),
