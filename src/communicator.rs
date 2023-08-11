@@ -14,6 +14,13 @@ impl Communicator {
     }
 
     pub async fn communicate(&self, input: Option<&str>, args: Option<&[&str]>) -> String {
+        match self.communicate_result(input, args).await {
+            Ok(x) => x,
+            Err(x) => x
+        }
+    }
+
+    pub async fn communicate_result(&self, input: Option<&str>, args: Option<&[&str]>) -> Result<String, String> {
         let mut command = Command::new(&self.executable);
 
         match input {
@@ -37,11 +44,15 @@ impl Communicator {
             drop(stdin);
         }
 
-        let output = prog.wait_with_output().await.expect("Could not communicate").stdout;
-        let mut answer = String::from_utf8(output).expect("Could not decode output");
+        let result = prog.wait_with_output().await.expect("Could not communicate");
+        let success = result.status.success();
+        let mut answer = String::from_utf8(result.stdout).expect("Could not decode output");
 
         ensure_newline(&mut answer);
-        answer
+        match success {
+            true => Ok(answer),
+            false => Err(answer)
+        }
     }
 }
 
