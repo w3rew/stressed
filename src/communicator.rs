@@ -54,15 +54,13 @@ impl<T> From<T> for Communicator where PathBuf: From<T> {
 #[cfg(all(target_os = "linux", test))]
 mod tests {
     use super::*;
-    use std::fmt;
-    #[test]
-    fn echo_solver() {
+    #[tokio::test]
+    async fn echo_solver() {
         let solver = Communicator::from("cat");
 
         for i in 0..100 {
-            let mut i_string = format!("{i}\n");
-            let ans = solver.communicate(Some(&i_string), None);
-            println!("ans={ans} i_string={i_string}");
+            let i_string = format!("{i}\n");
+            let ans = solver.communicate(Some(&i_string), None).await;
             assert_eq!(ans, i_string);
         }
     }

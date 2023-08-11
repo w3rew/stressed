@@ -1,7 +1,6 @@
 use crate::utils::{SeedType, TestCase};
-use crate::checker::Checker;
-use crate::Communicator;
-use crate::Sampler;
+use crate::Checker;
+use crate::{Sampler, Solver};
 use indicatif::ProgressBar;
 use std::fmt;
 use futures::prelude::*;
@@ -12,7 +11,7 @@ const WORKERS_PERMITS: usize = 32;
 const BAR_STEP: usize = 20;
 
 pub async fn run_sequence(generator: &Sampler,
-                          prog: &Communicator,
+                          prog: &Solver,
                           checker: &dyn Checker,
                           niter: usize,
                           progress: bool) -> Result<(), Box<dyn fmt::Display>> {
@@ -48,7 +47,7 @@ pub async fn run_sequence(generator: &Sampler,
             let permit = fds_semaphore_ref.acquire().await.unwrap();
             let sample = generator.sample(cur_seed).await;
             let testcase = TestCase::new(cur_seed, sample);
-            let answer = prog.communicate(Some(&testcase.body), None).await;
+            let answer = prog.solve(&testcase.body).await;
             let result = checker.check(&testcase, &answer).await;
             drop(permit);
 

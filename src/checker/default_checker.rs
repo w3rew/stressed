@@ -68,8 +68,8 @@ fn build_error(testcase: &TestCase,
 #[cfg(all(target_os = "linux", test))]
 mod tests {
     use super::*;
-    #[test]
-    fn echo_solution() {
+    #[tokio::test]
+    async fn echo_solution() {
         let checker = DefaultChecker::from("cat");
 
         let my_prog = Communicator::from("cat");
@@ -77,40 +77,37 @@ mod tests {
         for i in 0..100 {
             let testcase = TestCase::new(i, i.to_string());
 
-            let my_ans = my_prog.communicate(Some(&testcase.body), None);
-            let checked = checker.check(&testcase, &my_ans);
+            let my_ans = my_prog.communicate(Some(&testcase.body), None).await;
+            let checked = checker.check(&testcase, &my_ans).await;
 
             assert!(matches!(checked, Ok(())));
         }
     }
 
-    #[test]
-    fn no_newline() {
+    #[tokio::test]
+    async fn no_newline() {
         let checker = DefaultChecker::from("cat");
-
         let my_prog = Communicator::from("cat");
 
         for i in 0..100 {
             let testcase = TestCase::new(i, format!("{i}\n"));
 
-            let mut my_ans = my_prog.communicate(Some(&testcase.body), None);
-            let checked = checker.check(&testcase, &my_ans);
+            let my_ans = my_prog.communicate(Some(&testcase.body), None).await;
+            let checked = checker.check(&testcase, &my_ans).await;
 
             assert!(matches!(checked, Ok(())));
         }
     }
 
-    #[test]
-    fn minus_one() {
+    #[tokio::test]
+    async fn minus_one() {
         let checker = DefaultChecker::from("cat");
-
-        let my_prog = Communicator::from("cat");
 
         for i in 1..100 {
             let testcase = TestCase::new(i, format!("{}\n",  i.to_string()));
 
-            let mut my_ans = format!("{}\n", i - 1);
-            let checked = checker.check(&testcase, &my_ans);
+            let my_ans = format!("{}\n", i - 1);
+            let checked = checker.check(&testcase, &my_ans).await;
 
             assert!(matches!(checked, Err(_)));
         }
