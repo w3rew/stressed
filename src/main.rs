@@ -1,17 +1,9 @@
-mod args;
-mod utils;
-mod checker;
-mod communicator;
-mod runner;
-mod sampler;
-mod solver;
-
-use crate::args::parse_args;
-use crate::checker::{Checker, DefaultChecker, CustomChecker};
-use crate::runner::run_sequence;
-use crate::sampler::Sampler;
-use crate::solver::Solver;
-use crate::utils::SilentResult;
+use stressed::args::parse_args;
+use stressed::checker::{Checker, DefaultChecker, CustomChecker};
+use stressed::runner::run_sequence;
+use stressed::sampler::Sampler;
+use stressed::solver::Solver;
+use stressed::utils::SilentResult;
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> SilentResult {
