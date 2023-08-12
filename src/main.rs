@@ -11,9 +11,10 @@ use crate::checker::{Checker, DefaultChecker, CustomChecker};
 use crate::runner::run_sequence;
 use crate::sampler::Sampler;
 use crate::solver::Solver;
+use crate::utils::SilentResult;
 
 #[tokio::main(flavor = "multi_thread")]
-async fn main() -> std::io::Result<()> {
+async fn main() -> SilentResult {
     let args = parse_args();
 
     let sampler = Sampler::new(args.sampler_path, args.sampler_use_stdin);
@@ -34,10 +35,10 @@ async fn main() -> std::io::Result<()> {
 
     if let Err(display) = result {
         eprint!("{display}");
-        Err(std::io::Error::from_raw_os_error(1))
+        SilentResult::Error
     } else {
         println!("Tests passed!");
-        std::io::Result::Ok(())
+        SilentResult::Ok
     }
 
 }
