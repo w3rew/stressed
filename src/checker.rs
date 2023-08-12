@@ -1,14 +1,14 @@
-mod default_checker;
 mod custom_checker;
+mod default_checker;
 
 use crate::utils::TestCase;
-use std::result::Result;
 use std::fmt;
+use std::result::Result;
 
 use async_trait::async_trait;
 
-pub use default_checker::DefaultChecker;
 pub use custom_checker::CustomChecker;
+pub use default_checker::DefaultChecker;
 
 #[async_trait]
 pub trait Check {

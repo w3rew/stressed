@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use clap::{Parser, ValueEnum};
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[command(name = "stressed")]
@@ -26,11 +26,11 @@ pub struct Args {
     /// Use stdin to supply random seed to sampler. The default behaviour is
     /// to specify it as the only argument to the sampler.
     #[arg(long = "sampler_use_stdin")]
-    pub sampler_use_stdin : bool,
+    pub sampler_use_stdin: bool,
 
     /// Mode to use for diffs; works only for default checker
     #[arg(value_enum, long = "diff_mode", default_value_t = DiffMode::Char)]
-    pub diff_mode : DiffMode,
+    pub diff_mode: DiffMode,
 
     #[arg(short, long)]
     pub debug: bool,
@@ -54,7 +54,7 @@ pub enum DiffMode {
 
     /// Do not output diff at all; instead, just output what the tested program answered.
     /// This might be desirable since the reference solver's output is printed anyway.
-    None
+    None,
 }
 
 pub fn parse_args() -> Args {

@@ -1,11 +1,11 @@
-mod messages;
 mod compare_error;
+mod messages;
 
 pub type SeedType = i64;
 
-pub use messages::TestCase;
 pub use compare_error::CompareError;
-use std::process::{Termination, ExitCode};
+pub use messages::TestCase;
+use std::process::{ExitCode, Termination};
 
 pub fn ensure_newline(s: &mut String) {
     s.truncate(s.trim_end().len());
@@ -14,7 +14,7 @@ pub fn ensure_newline(s: &mut String) {
 
 pub enum SilentResult {
     Ok,
-    Error
+    Error,
 }
 
 impl Termination for SilentResult {

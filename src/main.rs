@@ -1,5 +1,5 @@
 use stressed::args::parse_args;
-use stressed::checker::{Checker, DefaultChecker, CustomChecker};
+use stressed::checker::{Checker, CustomChecker, DefaultChecker};
 use stressed::runner::run_sequence;
 use stressed::sampler::Sampler;
 use stressed::solver::Solver;
@@ -18,12 +18,7 @@ async fn main() -> SilentResult {
         Box::new(DefaultChecker::new(args.checker_path, args.diff_mode))
     };
 
-
-    let result = run_sequence(&sampler,
-                              &prog,
-                              &*checker,
-                              args.niter,
-                              args.progress).await;
+    let result = run_sequence(&sampler, &prog, &*checker, args.niter, args.progress).await;
 
     if let Err(display) = result {
         eprint!("{display}");
@@ -32,5 +27,4 @@ async fn main() -> SilentResult {
         println!("Tests passed!");
         SilentResult::Ok
     }
-
 }

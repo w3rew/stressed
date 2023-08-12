@@ -1,15 +1,18 @@
-use std::path::PathBuf;
 use crate::communicator::Communicator;
 use crate::utils::SeedType;
+use std::path::PathBuf;
 
 pub struct Sampler {
     c: Communicator,
-    use_stdin: bool
+    use_stdin: bool,
 }
 
 impl Sampler {
     pub fn new(executable: PathBuf, use_stdin: bool) -> Sampler {
-        Sampler{c: Communicator::new(executable), use_stdin}
+        Sampler {
+            c: Communicator::new(executable),
+            use_stdin,
+        }
     }
 
     pub async fn sample(&self, seed: SeedType) -> String {

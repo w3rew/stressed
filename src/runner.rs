@@ -1,23 +1,25 @@
 use crate::utils::{SeedType, TestCase};
 use crate::Checker;
 use crate::{Sampler, Solver};
-use indicatif::ProgressBar;
-use std::fmt;
 use futures::prelude::*;
 use futures::stream::FuturesUnordered;
+use indicatif::ProgressBar;
+use std::fmt;
 use tokio::sync::Semaphore;
 
 const WORKERS_PERMITS: usize = 32;
 const BAR_STEP: usize = 20;
 
-pub async fn run_sequence(generator: &Sampler,
-                          prog: &Solver,
-                          checker: &dyn Checker,
-                          niter: usize,
-                          progress: bool) -> Result<(), Box<dyn fmt::Display>> {
+pub async fn run_sequence(
+    generator: &Sampler,
+    prog: &Solver,
+    checker: &dyn Checker,
+    niter: usize,
+    progress: bool,
+) -> Result<(), Box<dyn fmt::Display>> {
     let bar = match progress {
         true => ProgressBar::new(niter.try_into().unwrap()),
-        false => ProgressBar::hidden()
+        false => ProgressBar::hidden(),
     };
 
     let mut seed = SeedType::MIN;
@@ -34,9 +36,8 @@ pub async fn run_sequence(generator: &Sampler,
     // fibers, so the lifetime is correct. That's why the hackery with transmute is safe.
     let fds_semaphore = Semaphore::new(WORKERS_PERMITS);
     let fds_semaphore_ptr = &fds_semaphore as *const Semaphore;
-    let fds_semaphore_ref: &'static Semaphore = unsafe {
-        std::mem::transmute::<*const Semaphore, &'static Semaphore>(fds_semaphore_ptr)
-    };
+    let fds_semaphore_ref: &'static Semaphore =
+        unsafe { std::mem::transmute::<*const Semaphore, &'static Semaphore>(fds_semaphore_ptr) };
 
     for _ in 0..niter {
         let cur_seed = seed.clone();
@@ -53,8 +54,7 @@ pub async fn run_sequence(generator: &Sampler,
 
             if let Err(e) = result {
                 Err(e)
-            }
-            else {
+            } else {
                 Ok(())
             }
         });
@@ -68,17 +68,17 @@ pub async fn run_sequence(generator: &Sampler,
             None => {
                 bar.finish();
                 return Ok(());
-            },
+            }
             Some(Err(e)) => {
                 bar.finish();
                 return Err(e);
-            },
+            }
             Some(Ok(_)) => {
                 completed += 1;
                 if completed % BAR_STEP == 0 {
                     bar.inc(BAR_STEP as u64);
                 }
-            },
+            }
         }
     }
     // Unreachable

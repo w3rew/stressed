@@ -1,9 +1,9 @@
 use crate::checker::Check;
 use crate::communicator::Communicator;
-use std::fmt;
 use crate::utils::TestCase;
-use std::path::PathBuf;
 use async_trait::async_trait;
+use std::fmt;
+use std::path::PathBuf;
 
 pub struct CustomChecker {
     checker: Communicator,
@@ -11,11 +11,16 @@ pub struct CustomChecker {
 
 impl CustomChecker {
     pub fn new(checker: PathBuf) -> CustomChecker {
-        CustomChecker{checker: Communicator::new(checker)}
+        CustomChecker {
+            checker: Communicator::new(checker),
+        }
     }
 }
 
-impl<T> From<T> for CustomChecker where PathBuf: From<T> {
+impl<T> From<T> for CustomChecker
+where
+    PathBuf: From<T>,
+{
     fn from(val: T) -> CustomChecker {
         CustomChecker::new(PathBuf::from(val))
     }
@@ -25,11 +30,14 @@ impl<T> From<T> for CustomChecker where PathBuf: From<T> {
 impl Check for CustomChecker {
     async fn check(&self, case: &TestCase, answer: &str) -> Result<(), Box<dyn fmt::Display>> {
         let combined_input = format!("{}{}", case.body, answer);
-        let answer = self.checker.communicate_result(Some(&combined_input), None).await;
+        let answer = self
+            .checker
+            .communicate_result(Some(&combined_input), None)
+            .await;
 
         match answer {
             Ok(_) => Ok(()),
-            Err(display) => Err(Box::new(display))
+            Err(display) => Err(Box::new(display)),
         }
     }
 }

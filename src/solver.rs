@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use crate::communicator::Communicator;
+use std::path::PathBuf;
 
 pub struct Solver {
     c: Communicator,
@@ -7,7 +7,9 @@ pub struct Solver {
 
 impl Solver {
     pub fn new(executable: PathBuf) -> Solver {
-        Solver{c: Communicator::new(executable)}
+        Solver {
+            c: Communicator::new(executable),
+        }
     }
 
     pub async fn solve(&self, input: &str) -> String {
