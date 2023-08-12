@@ -29,7 +29,7 @@ pub struct Args {
     pub sampler_use_stdin : bool,
 
     /// Mode to use for diffs; works only for default checker
-    #[arg(long = "line_diff")]
+    #[arg(value_enum, long = "diff_mode", default_value_t = DiffMode::Char)]
     pub diff_mode : DiffMode,
 
     #[arg(short, long)]
