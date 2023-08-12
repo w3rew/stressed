@@ -6,18 +6,19 @@ use similar::{ChangeTag, TextDiff};
 use colored::Colorize;
 use std::fmt::Display;
 use std::path::PathBuf;
+use crate::args::DiffMode;
 
 use async_trait::async_trait;
 
 pub struct DefaultChecker {
     reference_solver: Communicator,
-    line_diff: bool
+    diff_mode: DiffMode,
 }
 
 impl DefaultChecker {
-    pub fn new(reference_solver: PathBuf, line_diff: bool) -> DefaultChecker {
+    pub fn new(reference_solver: PathBuf, diff_mode: DiffMode) -> DefaultChecker {
         DefaultChecker{reference_solver: Communicator::new(reference_solver),
-                       line_diff}
+                       diff_mode}
     }
 }
 
@@ -29,7 +30,7 @@ impl Check for DefaultChecker {
         if correct_answer == answer {
             Ok(())
         } else {
-            build_error(testcase, &correct_answer, answer, self.line_diff)
+            build_error(testcase, &correct_answer, answer, self.diff_mode)
         }
     }
 }
@@ -37,30 +38,34 @@ impl Check for DefaultChecker {
 fn build_error(testcase: &TestCase,
                correct_answer: &str,
                my_answer: &str,
-               line_diff: bool) -> Result<(), Box<dyn Display>> {
+               diff_mode: DiffMode) -> Result<(), Box<dyn Display>> {
     let mut ans = Vec::new();
 
-    let diff = if line_diff {
-        TextDiff::from_lines(correct_answer, my_answer)
+    if let DiffMode::None = diff_mode {
+        ans.push(my_answer.normal());
     } else {
-        TextDiff::from_chars(correct_answer, my_answer)
-    };
-
-    let mut seen_change = false;
-
-    for change in diff.iter_all_changes() {
-        let token = match change.tag() {
-            ChangeTag::Delete => {seen_change = true;
-                                   change.as_str().unwrap().red()}
-            ChangeTag::Insert => {seen_change = true;
-                                  change.as_str().unwrap().green()}
-            ChangeTag::Equal => change.as_str().unwrap().dimmed()
+        let diff = match diff_mode {
+            DiffMode::Line => TextDiff::from_lines(correct_answer, my_answer),
+            DiffMode::Char => TextDiff::from_chars(correct_answer, my_answer),
+            _ => unreachable!()
         };
-        ans.push(token);
-    }
 
-    if !seen_change {
-        unreachable!("Shouldn't have called this function");
+        let mut seen_change = false;
+
+        for change in diff.iter_all_changes() {
+            let token = match change.tag() {
+                ChangeTag::Delete => {seen_change = true;
+                    change.as_str().unwrap().red()}
+                ChangeTag::Insert => {seen_change = true;
+                    change.as_str().unwrap().green()}
+                ChangeTag::Equal => change.as_str().unwrap().dimmed()
+            };
+            ans.push(token);
+        }
+
+        if !seen_change {
+            unreachable!("Shouldn't have called this function");
+        }
     }
     let log = CompareError::new(testcase.clone(), String::from(correct_answer), ans);
     Result::Err(Box::new(log))
@@ -71,7 +76,7 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn echo_solution() {
-        let checker = DefaultChecker::new(PathBuf::from("cat"), false);
+        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None);
 
         let my_prog = Communicator::new(PathBuf::from("cat"));
 
@@ -87,7 +92,7 @@ mod tests {
 
     #[tokio::test]
     async fn no_newline() {
-        let checker = DefaultChecker::new(PathBuf::from("cat"), false);
+        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None);
         let my_prog = Communicator::new(PathBuf::from("cat"));
 
         for i in 0..100 {
@@ -102,7 +107,7 @@ mod tests {
 
     #[tokio::test]
     async fn minus_one() {
-        let checker = DefaultChecker::new(PathBuf::from("cat"), false);
+        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None);
 
         for i in 1..100 {
             let testcase = TestCase::new(i, format!("{}\n",  i.to_string()));

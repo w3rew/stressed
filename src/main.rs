@@ -13,7 +13,7 @@ use crate::sampler::Sampler;
 use crate::solver::Solver;
 
 #[tokio::main(flavor = "multi_thread")]
-async fn main() {
+async fn main() -> std::io::Result<()> {
     let args = parse_args();
 
     let sampler = Sampler::new(args.sampler_path, args.sampler_use_stdin);
@@ -22,7 +22,7 @@ async fn main() {
     let checker: Box<dyn Checker> = if args.custom_checker {
         Box::new(CustomChecker::from(args.checker_path))
     } else {
-        Box::new(DefaultChecker::new(args.checker_path, args.line_diff))
+        Box::new(DefaultChecker::new(args.checker_path, args.diff_mode))
     };
 
 
@@ -34,8 +34,10 @@ async fn main() {
 
     if let Err(display) = result {
         eprint!("{display}");
+        Err(std::io::Error::from_raw_os_error(1))
     } else {
         println!("Tests passed!");
+        std::io::Result::Ok(())
     }
 
 }

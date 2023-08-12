@@ -81,5 +81,5 @@ pub async fn run_sequence(generator: &Sampler,
             },
         }
     }
-    unreachable!()
+    // Unreachable
 }
