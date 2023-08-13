@@ -35,4 +35,4 @@ The easier alternative is to use precompiled statically-linked binaries under th
 Those are built using Github Actions and you can inspect the build scripts yourself, so it's safe.
 
 ## Usage
-The CLI documentation can be found [here](CLI.md)
+The CLI documentation can be found [here](docs/CLI.md)
