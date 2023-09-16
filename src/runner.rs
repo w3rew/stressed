@@ -11,6 +11,19 @@ use tokio_util::sync::CancellationToken;
 const WORKERS_PERMITS: usize = 32;
 const BAR_STEP: usize = 20;
 
+macro_rules! return_if_cancelled {
+    ($default:expr, $alternative:expr, $if_cancelled:expr) => {
+        tokio::select! {
+            _my_return = $default => {
+                _my_return
+            },
+            _ = $alternative => {
+                return $if_cancelled;
+            }
+        }
+    }
+}
+
 pub async fn run_sequence(
     generator: &Sampler,
     prog: &Solver,
@@ -54,15 +67,9 @@ pub async fn run_sequence(
             // Sampling, solving and checking are probably not worth the
             // trouble as both generator and program are supposed to be very
             // fast, although it's worth investigating
-            let permit = tokio::select! {
-                permit = fds_semaphore_ref.acquire() => {
-                    permit
-                },
-                _ = cur_cancel_token.cancelled() => {
-                    return Ok(());
-                }
-            };
-
+            let permit = return_if_cancelled!(fds_semaphore_ref.acquire(),
+                                              cur_cancel_token.cancelled(),
+                                              Ok(()));
             let sample = generator.sample(cur_seed).await;
             let testcase = TestCase::new(cur_seed, sample);
             let answer = prog.solve(&testcase.body).await;
