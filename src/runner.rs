@@ -63,15 +63,21 @@ pub async fn run_sequence(
 
     let mut completed: usize = 0;
 
+    let mut result = Ok(());
+
     loop {
         match futs.next().await {
             None => {
-                bar.finish();
-                return Ok(());
+                break;
             }
             Some(Err(e)) => {
-                bar.finish();
-                return Err(e);
+                if let Ok(_) = result {
+                    eprint!("{}", e); 
+                    result = Err(e);
+                }
+                // Early printing hack: if we print the result only in main,
+                // we have to wait for all threads to finish.
+                // Maybe change if cancellation works fine.
             }
             Some(Ok(_)) => {
                 completed += 1;
@@ -81,5 +87,9 @@ pub async fn run_sequence(
             }
         }
     }
-    // Unreachable
+    bar.finish();
+    if let Ok(_) = result {
+        println!("Tests passed!");
+    }
+    result
 }
