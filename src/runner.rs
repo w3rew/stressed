@@ -6,6 +6,7 @@ use futures::stream::FuturesUnordered;
 use indicatif::ProgressBar;
 use std::fmt;
 use tokio::sync::Semaphore;
+use tokio_util::sync::CancellationToken;
 
 const WORKERS_PERMITS: usize = 32;
 const BAR_STEP: usize = 20;
@@ -39,13 +40,29 @@ pub async fn run_sequence(
     let fds_semaphore_ref: &'static Semaphore =
         unsafe { std::mem::transmute::<*const Semaphore, &'static Semaphore>(fds_semaphore_ptr) };
 
+    let cancel_token = CancellationToken::new();
+
     for _ in 0..niter {
         let cur_seed = seed.clone();
         let generator = &generator;
         let prog = &prog;
         let checker = &checker;
+        let cur_cancel_token = cancel_token.clone();
         futs.push(async move {
-            let permit = fds_semaphore_ref.acquire().await.unwrap();
+            // We are concerned with cancellation only here as waiting in line
+            // for semaphore token is the most expensive part.
+            // Sampling, solving and checking are probably not worth the
+            // trouble as both generator and program are supposed to be very
+            // fast, although it's worth investigating
+            let permit = tokio::select! {
+                permit = fds_semaphore_ref.acquire() => {
+                    permit
+                },
+                _ = cur_cancel_token.cancelled() => {
+                    return Ok(());
+                }
+            };
+
             let sample = generator.sample(cur_seed).await;
             let testcase = TestCase::new(cur_seed, sample);
             let answer = prog.solve(&testcase.body).await;
@@ -72,7 +89,7 @@ pub async fn run_sequence(
             }
             Some(Err(e)) => {
                 if let Ok(_) = result {
-                    eprint!("{}", e); 
+                    cancel_token.cancel();
                     result = Err(e);
                 }
                 // Early printing hack: if we print the result only in main,
@@ -88,8 +105,5 @@ pub async fn run_sequence(
         }
     }
     bar.finish();
-    if let Ok(_) = result {
-        println!("Tests passed!");
-    }
     result
 }
