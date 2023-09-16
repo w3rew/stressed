@@ -21,7 +21,7 @@ macro_rules! return_if_cancelled {
                 return $if_cancelled;
             }
         }
-    }
+    };
 }
 
 pub async fn run_sequence(
@@ -67,9 +67,11 @@ pub async fn run_sequence(
             // Sampling, solving and checking are probably not worth the
             // trouble as both generator and program are supposed to be very
             // fast, although it's worth investigating
-            let permit = return_if_cancelled!(fds_semaphore_ref.acquire(),
-                                              cur_cancel_token.cancelled(),
-                                              Ok(()));
+            let permit = return_if_cancelled!(
+                fds_semaphore_ref.acquire(),
+                cur_cancel_token.cancelled(),
+                Ok(())
+            );
             let sample = generator.sample(cur_seed).await;
             let testcase = TestCase::new(cur_seed, sample);
             let answer = prog.solve(&testcase.body).await;

@@ -5,7 +5,6 @@ use stressed::sampler::Sampler;
 use stressed::solver::Solver;
 use stressed::utils::SilentResult;
 
-
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> SilentResult {
     let args = parse_args();
