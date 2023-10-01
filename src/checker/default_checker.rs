@@ -1,7 +1,8 @@
 use crate::args::DiffMode;
+use crate::checker::errors::CompareError;
 use crate::checker::Check;
 use crate::communicator::Communicator;
-use crate::utils::{CompareError, TestCase};
+use crate::utils::TestCase;
 use colored::Colorize;
 use similar::{ChangeTag, TextDiff};
 use std::fmt::Display;

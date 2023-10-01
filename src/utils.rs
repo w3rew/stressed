@@ -1,9 +1,7 @@
-mod compare_error;
 mod messages;
 
 pub type SeedType = i64;
 
-pub use compare_error::CompareError;
 pub use messages::TestCase;
 use std::process::{ExitCode, Termination};
 

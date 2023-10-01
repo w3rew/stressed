@@ -1,3 +1,4 @@
+use crate::checker::errors::CustomCheckerError;
 use crate::checker::Check;
 use crate::communicator::Communicator;
 use crate::utils::TestCase;
@@ -30,14 +31,18 @@ where
 impl Check for CustomChecker {
     async fn check(&self, case: &TestCase, answer: &str) -> Result<(), Box<dyn fmt::Display>> {
         let combined_input = format!("{}{}", case.body, answer);
-        let answer = self
+        let checker_answer = self
             .checker
             .communicate_result(Some(&combined_input), None)
             .await;
 
-        match answer {
+        match checker_answer {
             Ok(_) => Ok(()),
-            Err(display) => Err(Box::new(display)),
+            Err(display) => {
+                let err =
+                    CustomCheckerError::new(case.clone(), display.to_string(), answer.to_string());
+                Err(Box::new(err))
+            }
         }
     }
 }

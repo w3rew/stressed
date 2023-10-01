@@ -1,5 +1,6 @@
 mod custom_checker;
 mod default_checker;
+mod errors;
 
 use crate::utils::TestCase;
 use std::fmt;
