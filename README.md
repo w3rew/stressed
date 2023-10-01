@@ -37,12 +37,16 @@ Those are built using Github Actions and you can inspect the build scripts yours
 ## Usage
 
 ```bash
-stressed --sampler sampler.py --check bruteforce.py solution --progress -n 1000 --diff-mode char
+stressed --sampler ./generator.py --checker ./C.py ./c -n 1000 --diff-mode char
+# Or shorter
+stressed -s ./generator.py -c ./C.py ./c -n 1000 --diff-mode char
 ```
 ![Usage](docs/usage.png)
 
 
 This command sets the number of iterations to 1000 and outputs diff per character.
+Notice dots in `./generator.py` and other files: these are mandatory if using relative paths.
+
 For other parameters please refer to [CLI docs](docs/CLI.md).
 
 ### Solution
