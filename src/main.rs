@@ -27,7 +27,7 @@ async fn async_main() -> SilentResult {
 
     let prog = Solver::new(args.solver_path);
     let checker: Box<dyn Checker> = if args.custom_checker {
-        Box::new(CustomChecker::from(args.checker_path))
+        Box::new(CustomChecker::new(args.checker_path))
     } else {
         Box::new(DefaultChecker::new(args.checker_path, args.diff_mode))
     };
