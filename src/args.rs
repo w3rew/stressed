@@ -18,7 +18,7 @@ pub struct Args {
 
     /// Path to checker: either to reference solver, or to the dedicated
     /// checker. See custom_checker for details.
-    #[arg(short = 'c', long = "check", value_name = "check")]
+    #[arg(short = 'c', long = "checker", value_name = "check")]
     pub checker_path: PathBuf,
 
     /// Whether to use custom checker. Without this flag, --checker argument is
