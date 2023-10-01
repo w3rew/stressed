@@ -60,3 +60,6 @@ the seed will be printed in test synopsis on failure.
 Usually checker is a brute force solution to the same problem. Its output is compared to the program
 character by character. However, for more complex needs you can use custom checker with arbitrary logic.
 For details please refer to `--custom_checker` argument in [CLI docs](docs/CLI.md).
+
+## CLI arguments
+CLI arguments are described in detail in [CLI docs](docs/CLI.md).
