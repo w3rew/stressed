@@ -38,7 +38,6 @@ pub struct Args {
 
     // #[arg(short, long)]
     // pub debug: bool,
-
     /// Do not show progress bar
     #[arg(long = "no-progress")]
     pub no_progress: bool,
