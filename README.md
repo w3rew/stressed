@@ -1,10 +1,10 @@
 # stressed &mdash; a CLI tool to stress-test solutions in competitive programming
 
-Sad, but often when solving competitive programming problems they fail, and
+Often when solving competitive programming problems they fail, and
 on a platform that doesn't let you see the test cases that can be a problem.
 However, often it's easy to test the solution on small testcases, where another
-(probably more naive and simple) solution is feasible. Than by combining *sampler*,
-which generates small test cases randomly,
+(probably more naive and simple) solution is feasible. Than by combining *sampler*
+or *generator*, which generates small test cases randomly,
 and reference *solver*, broadly called *checker*, we can evaluate our solution and
 fix it.
 This project is aimed at providing flexible and **fast** tool to perform such testing.
@@ -35,4 +35,28 @@ The easier alternative is to use precompiled statically-linked binaries under th
 Those are built using Github Actions and you can inspect the build scripts yourself, so it's safe.
 
 ## Usage
-The CLI documentation can be found [here](docs/CLI.md)
+
+```bash
+stressed --sampler sampler.py --check bruteforce.py solution --progress -n 1000 --diff-mode char
+```
+![Usage](docs/usage.png)
+
+
+This command sets the number of iterations to 1000 and outputs diff per character.
+For other parameters please refer to [CLI docs](docs/CLI.md).
+
+### Solution
+
+This is the executable to test. It should accepth the testcase via *stdin* and
+print the answer to *stdout*.
+
+### Sampler
+Sampler (or generator) should be an executable, which generator random tests and prints them to standard output.
+It can (optionally) take random seed as command line argument for reproducible runs;
+the seed will be printed in test synopsis on failure.
+
+### Checker
+
+Usually checker is a brute force solution to the same problem. Its output is compared to the program
+character by character. However, for more complex needs you can use custom checker with arbitrary logic.
+For details please refer to `--custom_checker` argument in [CLI docs](docs/CLI.md).
