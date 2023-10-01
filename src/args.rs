@@ -40,7 +40,7 @@ pub struct Args {
     pub progress: bool,
 
     /// Number of samples to try
-    #[arg(short = 'n', long = "niter", default_value_t = 1000000)]
+    #[arg(short = 'n', long = "niter", default_value_t = 10000)]
     pub niter: usize,
 }
 
