@@ -33,7 +33,7 @@ pub struct Args {
     pub sampler_use_stdin: bool,
 
     /// Mode to use for diffs; works only for default checker
-    #[arg(value_enum, long = "diff_mode", default_value_t = DiffMode::Line)]
+    #[arg(value_enum, long = "diff-mode", default_value_t = DiffMode::Line)]
     pub diff_mode: DiffMode,
 
     // #[arg(short, long)]
