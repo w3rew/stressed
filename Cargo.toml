@@ -1,8 +1,16 @@
 [package]
 name = "stressed"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 default-run = "stressed"
+license = "MIT"
+description = "Universal CLI stress tester for competitive programming"
+homepage = "https://github.com/w3rew/stressed"
+documentation = "https://github.com/w3rew/stressed"
+repository = "https://github.com/w3rew/stressed"
+readme = "README.md"
+categories = ["command-line-utilities", "asynchronous"]
+keywords = ["competitive", "stress-test", "checker", "solver", "generator"]
 
 [features]
 multithreaded = []
