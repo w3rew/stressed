@@ -31,7 +31,11 @@ async fn async_main() -> SilentResult {
         Box::new(DefaultChecker::new(args.checker_path, args.diff_mode))
     };
 
-    let result = run_sequence(&sampler, &prog, &*checker, args.niter, args.progress).await;
+    let result = run_sequence(&sampler,
+                              &prog,
+                              &*checker,
+                              args.niter,
+                              !args.no_progress).await;
 
     if let Err(display) = result {
         eprint!("{display}");

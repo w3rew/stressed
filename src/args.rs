@@ -21,10 +21,9 @@ pub struct Args {
     #[arg(short = 'c', long = "check", value_name = "check")]
     pub checker_path: PathBuf,
 
-    /// Whether to use custom checker. Without this flag checker argument is
-    /// interpreted as path to the reference solver and the output of solution
-    /// is compared to the reference solver's. However, if custom_checker flag
-    /// is present, checker receives *testcase* and, **immediately after**, *the program's answer*
+    /// Whether to use custom checker. Without this flag, --checker argument is
+    /// interpreted as path to the reference solver. However, if custom_checker flag
+    /// is present, --checker receives *testcase* and, **immediately after**, *the program's answer*
     #[arg(long = "custom_checker")]
     pub custom_checker: bool,
 
@@ -37,12 +36,12 @@ pub struct Args {
     #[arg(value_enum, long = "diff_mode", default_value_t = DiffMode::Line)]
     pub diff_mode: DiffMode,
 
-    #[arg(short, long)]
-    pub debug: bool,
+    // #[arg(short, long)]
+    // pub debug: bool,
 
-    /// Show progress bar
-    #[arg(long)]
-    pub progress: bool,
+    /// Do not show progress bar
+    #[arg(long = "no-progress")]
+    pub no_progress: bool,
 
     /// Number of samples to try
     #[arg(short = 'n', long = "niter", default_value_t = 10000)]
