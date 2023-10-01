@@ -8,7 +8,7 @@ pub struct Args {
     pub solver_path: PathBuf,
 
     /// Path to sampler
-    #[arg(short = 's', long = "sampler", value_name = "sampler_path")]
+    #[arg(short = 's', long = "sampler", value_name = "sampler_path", visible_alias = "generator")]
     pub sampler_path: PathBuf,
 
     /// Path to checker: either to reference solver, or to the dedicated
@@ -29,7 +29,7 @@ pub struct Args {
     pub sampler_use_stdin: bool,
 
     /// Mode to use for diffs; works only for default checker
-    #[arg(value_enum, long = "diff_mode", default_value_t = DiffMode::Char)]
+    #[arg(value_enum, long = "diff_mode", default_value_t = DiffMode::Line)]
     pub diff_mode: DiffMode,
 
     #[arg(short, long)]
