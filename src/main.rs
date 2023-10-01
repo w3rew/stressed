@@ -19,7 +19,6 @@ fn main() -> SilentResult {
     rt.block_on(async_main())
 }
 
-
 async fn async_main() -> SilentResult {
     let args = parse_args();
 

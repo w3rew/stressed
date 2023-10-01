@@ -36,7 +36,6 @@ impl Communicator {
         };
         command.stdout(Stdio::piped()).stderr(Stdio::null());
 
-        
         let mut prog = command.spawn().expect("Couldn't spawn child process");
         drop(command);
 
@@ -44,8 +43,8 @@ impl Communicator {
             let mut stdin = prog.stdin.take().unwrap();
             stdin.write(input.as_bytes()).await.expect(
                 "Sampler provided non-empty data, but the program refused \
-                to read it. Check your program's input"
-                );
+                to read it. Check your program's input",
+            );
             drop(stdin);
         }
 

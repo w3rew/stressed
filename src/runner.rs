@@ -3,13 +3,15 @@ use crate::Checker;
 use crate::{Sampler, Solver};
 use futures::prelude::*;
 use futures::stream::FuturesUnordered;
-use indicatif::ProgressBar;
+use indicatif::{ProgressBar, ProgressStyle};
 use std::fmt;
 use tokio::sync::Semaphore;
 use tokio_util::sync::CancellationToken;
 
 const WORKERS_PERMITS: usize = 16;
-const BAR_STEP: usize = 20;
+const BAR_STEP: usize = 50;
+const PROGRESS_BAR_TEMPLATE: &str = "{wide_bar} | {pos}/{len} \
+                                     [{elapsed_precise}<{eta_precise}]";
 
 macro_rules! return_if_cancelled {
     ($default:expr, $alternative:expr, $if_cancelled:expr) => {
@@ -32,7 +34,8 @@ pub async fn run_sequence(
     progress: bool,
 ) -> Result<(), Box<dyn fmt::Display>> {
     let bar = match progress {
-        true => ProgressBar::new(niter.try_into().unwrap()),
+        true => ProgressBar::new(niter.try_into().unwrap())
+            .with_style(ProgressStyle::with_template(PROGRESS_BAR_TEMPLATE).unwrap()),
         false => ProgressBar::hidden(),
     };
 
