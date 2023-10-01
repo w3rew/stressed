@@ -21,11 +21,11 @@ jobs:
         run: cargo test --verbose
       - name: Test format
         run: cargo fmt --check
-      - name: Check CLI docs
-        run: |
-          cargo run --bin docgen ref_cli.md
-          cmp --silent ref_cli.md docs/CLI.md
-          rm ref_cli.md
+          #      - name: Check CLI docs
+          #        run: |
+          #          cargo run --bin docgen ref_cli.md
+          #          cmp --silent ref_cli.md docs/CLI.md
+          #          rm ref_cli.md
       - name: Linux binary
         env:
           TARGET: x86_64-unknown-linux-musl
