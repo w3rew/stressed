@@ -4,9 +4,23 @@ use stressed::runner::run_sequence;
 use stressed::sampler::Sampler;
 use stressed::solver::Solver;
 use stressed::utils::SilentResult;
+use tokio::runtime;
 
-#[tokio::main(flavor = "multi_thread")]
-async fn main() -> SilentResult {
+fn main() -> SilentResult {
+    #[cfg(feature = "multithreaded")]
+    let rt = runtime::Runtime::new().unwrap();
+
+    #[cfg(not(feature = "multithreaded"))]
+    let rt = runtime::Builder::new_current_thread()
+        .enable_io()
+        .build()
+        .unwrap();
+
+    rt.block_on(async_main())
+}
+
+
+async fn async_main() -> SilentResult {
     let args = parse_args();
 
     let sampler = Sampler::new(args.sampler_path, args.sampler_use_stdin);
