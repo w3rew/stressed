@@ -42,8 +42,8 @@ impl Communicator {
         if let Some(input) = input {
             let mut stdin = prog.stdin.take().unwrap();
             stdin.write(input.as_bytes()).await.expect(
-                "Sampler provided non-empty data, but the program refused \
-                to read it. Check your program's input",
+                "The program refused to read the data. \
+                Check your program's input",
             );
             drop(stdin);
         }
