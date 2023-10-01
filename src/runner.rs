@@ -8,7 +8,7 @@ use std::fmt;
 use tokio::sync::Semaphore;
 use tokio_util::sync::CancellationToken;
 
-const WORKERS_PERMITS: usize = 32;
+const WORKERS_PERMITS: usize = 16;
 const BAR_STEP: usize = 20;
 
 macro_rules! return_if_cancelled {
