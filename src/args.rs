@@ -8,7 +8,12 @@ pub struct Args {
     pub solver_path: PathBuf,
 
     /// Path to sampler
-    #[arg(short = 's', long = "sampler", value_name = "sampler_path", visible_alias = "generator")]
+    #[arg(
+        short = 's',
+        long = "sampler",
+        value_name = "sampler_path",
+        visible_alias = "generator"
+    )]
     pub sampler_path: PathBuf,
 
     /// Path to checker: either to reference solver, or to the dedicated
