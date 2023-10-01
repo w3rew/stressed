@@ -36,9 +36,10 @@ impl Communicator {
         };
         command.stdout(Stdio::piped()).stderr(Stdio::null());
 
-        let mut prog = command.spawn().expect(
-            &format!("Couldn't spawn child process {}",
-                     self.executable.to_str().unwrap()));
+        let mut prog = command.spawn().expect(&format!(
+            "Couldn't spawn child process {}",
+            self.executable.to_str().unwrap()
+        ));
         drop(command);
 
         if let Some(input) = input {
