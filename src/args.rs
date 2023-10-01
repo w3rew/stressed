@@ -17,19 +17,20 @@ pub struct Args {
     pub sampler_path: PathBuf,
 
     /// Path to checker: either to reference solver, or to the dedicated
-    /// checker. See custom_checker for details.
+    /// checker. See --use-custom-checker for details.
     #[arg(short = 'c', long = "checker", value_name = "check")]
     pub checker_path: PathBuf,
 
     /// Whether to use custom checker. Without this flag, --checker argument is
-    /// interpreted as path to the reference solver. However, if custom_checker flag
+    /// interpreted as path to the reference solver. If --use-custom-checker flag
     /// is present, --checker receives *testcase* and, **immediately after**, *the program's answer*
-    #[arg(long = "custom_checker")]
+    /// and should exit with zero or non-zero exit code.
+    #[arg(long = "use-custom-checker")]
     pub custom_checker: bool,
 
     /// Use stdin to supply random seed to sampler. The default behaviour is
     /// to specify it as the only argument to the sampler.
-    #[arg(long = "sampler_use_stdin")]
+    #[arg(long = "sampler-use-stdin")]
     pub sampler_use_stdin: bool,
 
     /// Mode to use for diffs; works only for default checker

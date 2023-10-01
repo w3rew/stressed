@@ -17,9 +17,9 @@ This document contains the help content for the `stressed` command-line program.
 ###### **Options:**
 
 * `-s`, `--sampler <sampler_path>` — Path to sampler
-* `-c`, `--checker <check>` — Path to checker: either to reference solver, or to the dedicated checker. See custom_checker for details
-* `--custom_checker` — Whether to use custom checker. Without this flag, --checker argument is interpreted as path to the reference solver. However, if custom_checker flag is present, --checker receives *testcase* and, **immediately after**, *the program's answer*
-* `--sampler_use_stdin` — Use stdin to supply random seed to sampler. The default behaviour is to specify it as the only argument to the sampler
+* `-c`, `--checker <check>` — Path to checker: either to reference solver, or to the dedicated checker. See --use-custom-checker for details
+* `--use-custom-checker` — Whether to use custom checker. Without this flag, --checker argument is interpreted as path to the reference solver. If --use-custom-checker flag is present, --checker receives *testcase* and, **immediately after**, *the program's answer* and should exit with zero or non-zero exit code
+* `--sampler-use-stdin` — Use stdin to supply random seed to sampler. The default behaviour is to specify it as the only argument to the sampler
 * `--diff-mode <DIFF_MODE>` — Mode to use for diffs; works only for default checker
 
   Default value: `line`
