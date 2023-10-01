@@ -18,11 +18,11 @@ This document contains the help content for the `stressed` command-line program.
 
 * `-s`, `--sampler <sampler_path>` — Path to sampler
 * `-c`, `--check <check>` — Path to checker: either to reference solver, or to the dedicated checker. See custom_checker for details
-* `--custom_checker` — Whether to use custom checker. Without this flag checker argument is interpreted as path to the reference solver and the output of solution is compared to the reference solver's. However, if custom_checker flag is present, checker receives *testcase* and, **immediately after**, *the program's answer*
+* `--custom_checker` — Whether to use custom checker. Without this flag, --checker argument is interpreted as path to the reference solver. However, if custom_checker flag is present, --checker receives *testcase* and, **immediately after**, *the program's answer*
 * `--sampler_use_stdin` — Use stdin to supply random seed to sampler. The default behaviour is to specify it as the only argument to the sampler
-* `--diff_mode <DIFF_MODE>` — Mode to use for diffs; works only for default checker
+* `--diff-mode <DIFF_MODE>` — Mode to use for diffs; works only for default checker
 
-  Default value: `char`
+  Default value: `line`
 
   Possible values:
   - `line`:
@@ -32,11 +32,10 @@ This document contains the help content for the `stressed` command-line program.
   - `none`:
     Do not output diff at all; instead, just output what the tested program answered. This might be desirable since the reference solver's output is printed anyway
 
-* `-d`, `--debug`
-* `--progress` — Show progress bar
+* `--no-progress` — Do not show progress bar
 * `-n`, `--niter <NITER>` — Number of samples to try
 
-  Default value: `1000000`
+  Default value: `10000`
 
 
 
