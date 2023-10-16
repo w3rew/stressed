@@ -10,7 +10,7 @@ pub struct Sampler {
 impl Sampler {
     pub fn new(executable: PathBuf, use_stdin: bool) -> Sampler {
         Sampler {
-            c: Communicator::new(executable),
+            c: Communicator::new(executable, false),
             use_stdin,
         }
     }

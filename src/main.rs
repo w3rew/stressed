@@ -24,11 +24,12 @@ async fn async_main() -> SilentResult {
 
     let sampler = Sampler::new(args.sampler_path, args.sampler_use_stdin);
 
-    let prog = Solver::new(args.solver_path);
+    let prog = Solver::new(args.solver_path, !args.no_trim_output);
     let checker: Box<dyn Checker> = if args.custom_checker {
         Box::new(CustomChecker::new(args.checker_path))
     } else {
-        Box::new(DefaultChecker::new(args.checker_path, args.diff_mode))
+        Box::new(DefaultChecker::new(args.checker_path, args.diff_mode,
+                                     !args.no_trim_output))
     };
 
     let result = run_sequence(&sampler, &prog, &*checker, args.niter, !args.no_progress).await;

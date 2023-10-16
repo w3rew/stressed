@@ -1,4 +1,4 @@
-use crate::utils::ensure_newline;
+use crate::utils::{trim_lines, ensure_newline};
 use std::path::PathBuf;
 use std::process::Stdio;
 use tokio::io::AsyncWriteExt;
@@ -6,11 +6,12 @@ use tokio::process::Command;
 
 pub struct Communicator {
     executable: PathBuf,
+    trim_output: bool,
 }
 
 impl Communicator {
-    pub fn new(executable: PathBuf) -> Communicator {
-        Communicator { executable }
+    pub fn new(executable: PathBuf, trim_output: bool) -> Communicator {
+        Communicator { executable, trim_output }
     }
 
     pub async fn communicate(&self, input: Option<&str>, args: Option<&[&str]>) -> String {
@@ -58,7 +59,11 @@ impl Communicator {
         let success = result.status.success();
         let mut answer = String::from_utf8(result.stdout).expect("Could not decode output");
 
+        if self.trim_output {
+            answer = trim_lines(&answer);
+        }
         ensure_newline(&mut answer);
+
         match success {
             true => Ok(answer),
             false => Err(answer),
@@ -71,7 +76,7 @@ where
     PathBuf: From<T>,
 {
     fn from(value: T) -> Communicator {
-        Communicator::new(PathBuf::from(value))
+        Communicator::new(PathBuf::from(value), false)
     }
 }
 

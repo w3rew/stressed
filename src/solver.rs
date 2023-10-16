@@ -6,9 +6,9 @@ pub struct Solver {
 }
 
 impl Solver {
-    pub fn new(executable: PathBuf) -> Solver {
+    pub fn new(executable: PathBuf, trim_output: bool) -> Solver {
         Solver {
-            c: Communicator::new(executable),
+            c: Communicator::new(executable, trim_output),
         }
     }
 
@@ -22,7 +22,7 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn echo_solver() {
-        let solver = Solver::new(PathBuf::from("cat"));
+        let solver = Solver::new(PathBuf::from("cat"), false);
         for i in 0..100 {
             let i_string = format!("{i}\n");
             let ans = solver.solve(&i_string).await;

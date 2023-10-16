@@ -13,7 +13,7 @@ pub struct CustomChecker {
 impl CustomChecker {
     pub fn new(checker: PathBuf) -> CustomChecker {
         CustomChecker {
-            checker: Communicator::new(checker),
+            checker: Communicator::new(checker, false),
         }
     }
 }
