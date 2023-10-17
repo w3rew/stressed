@@ -19,6 +19,8 @@ This document contains the help content for the `stressed` command-line program.
 * `-s`, `--sampler <sampler_path>` — Path to sampler
 * `-c`, `--checker <check>` — Path to checker: either to reference solver, or to the dedicated checker. See --use-custom-checker for details
 * `--use-custom-checker` — Whether to use custom checker. Without this flag, --checker argument is interpreted as path to the reference solver. If --use-custom-checker flag is present, --checker receives *testcase* and, **immediately after**, *the program's answer* and should exit with zero or non-zero exit code
+* `--trim-output` - Trim output of solvers. The default behaviour is to trim only the last line. Specify this option to trim every line. This can be slow for output-intensive tasks
+* `--save-failing-to <SAVE_FAILING_TO>` - Path to save failing test case. The default behaviour (when this flag is not given) is not to save the test case
 * `--sampler-use-stdin` — Use stdin to supply random seed to sampler. The default behaviour is to specify it as the only argument to the sampler
 * `--diff-mode <DIFF_MODE>` — Mode to use for diffs; works only for default checker
 

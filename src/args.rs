@@ -36,6 +36,7 @@ pub struct Args {
     /// Trim output of solvers. The default
     /// behaviour is to trim only the last line.
     /// Specify this option to trim every line.
+    /// This can be slow for output-intensive tasks
     #[arg(long = "trim-output")]
     pub trim_output: bool,
 

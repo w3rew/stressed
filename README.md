@@ -14,6 +14,8 @@ This project is aimed at providing flexible and **fast** tool to perform such te
     which is of the same format as the solution. There is no need to modify your solution in any way.
 - Fast: it uses asynchronous process spawns and outperforms naive realization by 2-5 times
 - Can use random seeds for sampler to facilitate reproducible testing
+- Can save the failing testcase to file automatically
+- You control whether to trim trailing whitespaces in output or not
 - Customizable:
     - Use default checker, which compares output with the reference solver, or use **custom checker**, which can
         check the output in any way
@@ -64,8 +66,16 @@ the seed will be printed in test synopsis on failure.
 Usually checker is a brute force solution to the same problem. Its output is compared to the program
 character by character. However, for more complex needs you can use **custom checker** with arbitrary logic.
 
-## CLI arguments
+## Configurable options
 CLI arguments besides `--use-custom-checker` are described in detail in [CLI docs](docs/CLI.md).
+Briefly, you can control:
+
+ - Whether to use custom checker (see below) or not
+ - Whether to trim every line of output or just the last one
+ - Whether to save the failing testcase to file or not
+ - Diff mode to use. The available are line-wise, character-wise and no diff.
+ - Whether to disable the progress bar
+ - The number of iterations
 
 ### Custom checker
 Custom checker should read both testcase and the checked solution from stdin,
