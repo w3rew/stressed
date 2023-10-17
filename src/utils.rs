@@ -2,7 +2,7 @@ mod messages;
 
 pub type SeedType = i64;
 
-pub use messages::TestCase;
+pub use messages::{TestCase, TestError};
 use std::process::{ExitCode, Termination};
 
 pub fn trim_lines(s: &str) -> String {

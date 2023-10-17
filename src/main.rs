@@ -37,8 +37,11 @@ async fn async_main() -> SilentResult {
 
     let result = run_sequence(&sampler, &prog, &*checker, args.niter, !args.no_progress).await;
 
-    if let Err(display) = result {
-        eprint!("{display}");
+    if let Err(test_error) = result {
+        eprint!("{test_error}");
+        if let Some(path) = args.save_failing_to {
+            test_error.save_testcase_to(&path).unwrap();
+        }
         SilentResult::Error
     } else {
         println!("Tests passed!");

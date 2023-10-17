@@ -1,10 +1,9 @@
-use crate::utils::{SeedType, TestCase};
+use crate::utils::{SeedType, TestCase, TestError};
 use crate::Checker;
 use crate::{Sampler, Solver};
 use futures::prelude::*;
 use futures::stream::FuturesUnordered;
 use indicatif::{ProgressBar, ProgressStyle};
-use std::fmt;
 use tokio::sync::Semaphore;
 use tokio_util::sync::CancellationToken;
 
@@ -32,7 +31,7 @@ pub async fn run_sequence(
     checker: &dyn Checker,
     niter: usize,
     progress: bool,
-) -> Result<(), Box<dyn fmt::Display>> {
+) -> Result<(), TestError> {
     let bar = match progress {
         true => ProgressBar::new(niter.try_into().unwrap())
             .with_style(ProgressStyle::with_template(PROGRESS_BAR_TEMPLATE).unwrap()),
@@ -82,7 +81,7 @@ pub async fn run_sequence(
             drop(permit);
 
             if let Err(e) = result {
-                Err(e)
+                Err(TestError::new(testcase, e))
             } else {
                 Ok(())
             }

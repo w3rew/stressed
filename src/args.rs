@@ -4,10 +4,10 @@ use std::path::PathBuf;
 #[derive(Debug, Parser)]
 #[command(name = "stressed")]
 pub struct Args {
-    /// Path to solver
+    /// Path to the solution
     pub solver_path: PathBuf,
 
-    /// Path to sampler
+    /// Path to sampler (generator)
     #[arg(
         short = 's',
         long = "sampler",
@@ -38,6 +38,11 @@ pub struct Args {
     /// Specify this option to trim every line.
     #[arg(long = "trim-output")]
     pub trim_output: bool,
+
+    /// Path to save failing test case. The default behaviour
+    /// (when this flag is not given) is not to save the test case.
+    #[arg(long = "save-failing-to")]
+    pub save_failing_to: Option<PathBuf>,
 
     /// Mode to use for diffs; works only for default checker
     #[arg(value_enum, long = "diff-mode", default_value_t = DiffMode::Line)]
