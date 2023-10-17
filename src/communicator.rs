@@ -1,4 +1,4 @@
-use crate::utils::{trim_lines, ensure_newline};
+use crate::utils::{ensure_newline, trim_lines};
 use std::path::PathBuf;
 use std::process::Stdio;
 use tokio::io::AsyncWriteExt;
@@ -11,7 +11,10 @@ pub struct Communicator {
 
 impl Communicator {
     pub fn new(executable: PathBuf, trim_output: bool) -> Communicator {
-        Communicator { executable, trim_output }
+        Communicator {
+            executable,
+            trim_output,
+        }
     }
 
     pub async fn communicate(&self, input: Option<&str>, args: Option<&[&str]>) -> String {

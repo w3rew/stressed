@@ -33,12 +33,11 @@ pub struct Args {
     #[arg(long = "sampler-use-stdin")]
     pub sampler_use_stdin: bool,
 
-
-    /// Do not trim output of solvers. The default
-    /// behaviour is to trim every line.
-    /// Specify this option to disable trimming.
-    #[arg(long = "no-trim-output")]
-    pub no_trim_output: bool,
+    /// Trim output of solvers. The default
+    /// behaviour is to trim only the last line.
+    /// Specify this option to trim every line.
+    #[arg(long = "trim-output")]
+    pub trim_output: bool,
 
     /// Mode to use for diffs; works only for default checker
     #[arg(value_enum, long = "diff-mode", default_value_t = DiffMode::Line)]

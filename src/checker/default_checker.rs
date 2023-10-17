@@ -17,11 +17,13 @@ pub struct DefaultChecker {
 }
 
 impl DefaultChecker {
-    pub fn new(reference_solver: PathBuf, diff_mode: DiffMode,
-               trim_output: bool) -> DefaultChecker {
+    pub fn new(
+        reference_solver: PathBuf,
+        diff_mode: DiffMode,
+        trim_output: bool,
+    ) -> DefaultChecker {
         DefaultChecker {
-            reference_solver: Communicator::new(reference_solver,
-                                                trim_output),
+            reference_solver: Communicator::new(reference_solver, trim_output),
             diff_mode,
         }
     }
@@ -90,8 +92,7 @@ mod tests {
     use super::*;
     #[tokio::test]
     async fn echo_solution() {
-        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None,
-                                                          false);
+        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None, false);
 
         let my_prog = Communicator::new(PathBuf::from("cat"), false);
 
@@ -107,8 +108,7 @@ mod tests {
 
     #[tokio::test]
     async fn no_newline() {
-        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None,
-                                                          false);
+        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None, false);
         let my_prog = Communicator::new(PathBuf::from("cat"), false);
 
         for i in 0..100 {
@@ -123,8 +123,7 @@ mod tests {
 
     #[tokio::test]
     async fn minus_one() {
-        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None,
-                                                          false);
+        let checker = DefaultChecker::new(PathBuf::from("cat"), DiffMode::None, false);
 
         for i in 1..100 {
             let testcase = TestCase::new(i, format!("{}\n", i.to_string()));
