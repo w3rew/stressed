@@ -1,4 +1,5 @@
 use crate::communicator::Communicator;
+use std::error::Error;
 use std::path::PathBuf;
 
 pub struct Solver {
@@ -12,8 +13,8 @@ impl Solver {
         }
     }
 
-    pub async fn solve(&self, input: &str) -> String {
-        self.c.communicate(Some(input), None).await
+    pub async fn solve(&self, input: &str) -> Result<String, Box<dyn Error>> {
+        self.c.communicate_result(Some(input), None).await
     }
 }
 
@@ -25,7 +26,7 @@ mod tests {
         let solver = Solver::new(PathBuf::from("cat"), false);
         for i in 0..100 {
             let i_string = format!("{i}\n");
-            let ans = solver.solve(&i_string).await;
+            let ans = solver.solve(&i_string).await.unwrap();
             assert_eq!(ans, i_string);
         }
     }

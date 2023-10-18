@@ -3,7 +3,7 @@ use stressed::checker::{Checker, CustomChecker, DefaultChecker};
 use stressed::runner::run_sequence;
 use stressed::sampler::Sampler;
 use stressed::solver::Solver;
-use stressed::utils::SilentResult;
+use stressed::utils::{SilentResult, TestResult};
 use tokio::runtime;
 
 fn main() -> SilentResult {
@@ -37,14 +37,14 @@ async fn async_main() -> SilentResult {
 
     let result = run_sequence(&sampler, &prog, &*checker, args.niter, !args.no_progress).await;
 
-    if let Err(test_error) = result {
-        eprint!("{test_error}");
-        if let Some(path) = args.save_failing_to {
-            test_error.save_testcase_to(&path).unwrap();
-        }
-        SilentResult::Error
-    } else {
+    if let TestResult::Ok = result {
         println!("Tests passed!");
         SilentResult::Ok
+    } else {
+        eprint!("{}", result);
+        if let Some(path) = args.save_failing_to {
+            result.save_testcase_to(&path).unwrap();
+        }
+        SilentResult::Error
     }
 }

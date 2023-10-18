@@ -1,9 +1,8 @@
 use crate::checker::errors::CustomCheckerError;
-use crate::checker::Check;
+use crate::checker::{Check, CheckerError};
 use crate::communicator::Communicator;
 use crate::utils::TestCase;
 use async_trait::async_trait;
-use std::fmt;
 use std::path::PathBuf;
 
 pub struct CustomChecker {
@@ -29,7 +28,7 @@ where
 
 #[async_trait]
 impl Check for CustomChecker {
-    async fn check(&self, case: &TestCase, answer: &str) -> Result<(), Box<dyn fmt::Display>> {
+    async fn check(&self, case: &TestCase, answer: &str) -> Result<(), CheckerError> {
         let combined_input = format!("{}{}", case.body, answer);
         let checker_answer = self
             .checker
@@ -39,9 +38,8 @@ impl Check for CustomChecker {
         match checker_answer {
             Ok(_) => Ok(()),
             Err(display) => {
-                let err =
-                    CustomCheckerError::new(case.clone(), display.to_string(), answer.to_string());
-                Err(Box::new(err))
+                let err = CustomCheckerError::new(display, answer.to_string());
+                Err(CheckerError::WrongAnswer(Box::new(err)))
             }
         }
     }

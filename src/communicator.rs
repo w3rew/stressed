@@ -1,4 +1,5 @@
-use crate::utils::{ensure_newline, trim_lines};
+use crate::utils::{ensure_newline, trim_lines, ProgramFailure};
+use std::error::Error;
 use std::path::PathBuf;
 use std::process::Stdio;
 use tokio::io::AsyncWriteExt;
@@ -18,17 +19,14 @@ impl Communicator {
     }
 
     pub async fn communicate(&self, input: Option<&str>, args: Option<&[&str]>) -> String {
-        match self.communicate_result(input, args).await {
-            Ok(x) => x,
-            Err(x) => x,
-        }
+        self.communicate_result(input, args).await.unwrap()
     }
 
     pub async fn communicate_result(
         &self,
         input: Option<&str>,
         args: Option<&[&str]>,
-    ) -> Result<String, String> {
+    ) -> Result<String, Box<dyn Error>> {
         let mut command = Command::new(&self.executable);
 
         match input {
@@ -38,38 +36,32 @@ impl Communicator {
         if let Some(args) = args {
             command.args(args);
         };
-        command.stdout(Stdio::piped()).stderr(Stdio::null());
+        command.stdout(Stdio::piped()).stderr(Stdio::piped());
 
-        let mut prog = command.spawn().expect(&format!(
-            "Couldn't spawn child process {}",
-            self.executable.to_str().unwrap()
-        ));
+        let mut prog = command.spawn()?;
         drop(command);
 
         if let Some(input) = input {
             let mut stdin = prog.stdin.take().unwrap();
-            stdin.write(input.as_bytes()).await.expect(
-                "The program refused to read the data. \
-                Check your program's input",
-            );
+            stdin.write(input.as_bytes()).await?;
             drop(stdin);
         }
 
-        let result = prog
-            .wait_with_output()
-            .await
-            .expect("Could not communicate");
+        let result = prog.wait_with_output().await?;
+
         let success = result.status.success();
-        let mut answer = String::from_utf8(result.stdout).expect("Could not decode output");
+        let mut answer = String::from_utf8(result.stdout)?;
 
         if self.trim_output {
             answer = trim_lines(&answer);
         }
         ensure_newline(&mut answer);
-
         match success {
             true => Ok(answer),
-            false => Err(answer),
+            false => {
+                let err_out = String::from_utf8(result.stderr)?;
+                Err(Box::new(ProgramFailure::new(err_out)))
+            }
         }
     }
 }

@@ -1,11 +1,10 @@
 use crate::args::DiffMode;
 use crate::checker::errors::CompareError;
-use crate::checker::Check;
+use crate::checker::{Check, CheckerError};
 use crate::communicator::Communicator;
 use crate::utils::TestCase;
 use colored::Colorize;
 use similar::{ChangeTag, TextDiff};
-use std::fmt::Display;
 use std::path::PathBuf;
 use std::result::Result;
 
@@ -31,26 +30,28 @@ impl DefaultChecker {
 
 #[async_trait]
 impl Check for DefaultChecker {
-    async fn check(&self, testcase: &TestCase, answer: &str) -> Result<(), Box<dyn Display>> {
+    async fn check(&self, testcase: &TestCase, answer: &str) -> Result<(), CheckerError> {
         let correct_answer = self
             .reference_solver
-            .communicate(Some(&testcase.body), None)
+            .communicate_result(Some(&testcase.body), None)
             .await;
-
+        let correct_answer = match correct_answer {
+            Err(e) => return Err(CheckerError::RuntimeError(e)),
+            Ok(x) => x,
+        };
         if correct_answer == answer {
             Ok(())
         } else {
-            build_error(testcase, &correct_answer, answer, self.diff_mode)
+            Err(CheckerError::WrongAnswer(Box::new(build_error(
+                &correct_answer,
+                answer,
+                self.diff_mode,
+            ))))
         }
     }
 }
 
-fn build_error(
-    testcase: &TestCase,
-    correct_answer: &str,
-    my_answer: &str,
-    diff_mode: DiffMode,
-) -> Result<(), Box<dyn Display>> {
+fn build_error(correct_answer: &str, my_answer: &str, diff_mode: DiffMode) -> CompareError {
     let mut ans = Vec::new();
 
     if let DiffMode::None = diff_mode {
@@ -83,8 +84,7 @@ fn build_error(
             unreachable!("Shouldn't have called this function");
         }
     }
-    let log = CompareError::new(testcase.clone(), String::from(correct_answer), ans);
-    Result::Err(Box::new(log))
+    CompareError::new(String::from(correct_answer), ans)
 }
 
 #[cfg(all(target_os = "linux", test))]

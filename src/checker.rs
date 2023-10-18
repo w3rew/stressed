@@ -2,8 +2,9 @@ mod custom_checker;
 mod default_checker;
 mod errors;
 
+pub use errors::CheckerError;
+
 use crate::utils::TestCase;
-use std::fmt;
 use std::result::Result;
 
 use async_trait::async_trait;
@@ -13,7 +14,7 @@ pub use default_checker::DefaultChecker;
 
 #[async_trait]
 pub trait Check {
-    async fn check(&self, input: &TestCase, answer: &str) -> Result<(), Box<dyn fmt::Display>>;
+    async fn check(&self, input: &TestCase, answer: &str) -> Result<(), CheckerError>;
 }
 
 pub trait Checker: Sync + Check {}

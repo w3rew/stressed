@@ -1,6 +1,6 @@
-use crate::utils::{SeedType, TestCase, TestError};
-use crate::Checker;
-use crate::{Sampler, Solver};
+use crate::checker::CheckerError;
+use crate::utils::{SeedType, TestCase, TestResult};
+use crate::{Checker, Sampler, Solver};
 use futures::prelude::*;
 use futures::stream::FuturesUnordered;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -25,13 +25,37 @@ macro_rules! return_if_cancelled {
     };
 }
 
+async fn run_one<'a>(
+    generator: &'a Sampler,
+    prog: &'a Solver,
+    checker: &'a dyn Checker,
+    seed: SeedType,
+) -> TestResult {
+    let sample = match generator.sample(seed).await {
+        Err(e) => return TestResult::SamplerError(e),
+        Ok(s) => s,
+    };
+    let testcase = TestCase::new(seed, sample);
+    let answer = match prog.solve(&testcase.body).await {
+        Ok(s) => s,
+        Err(err) => {
+            return TestResult::SolutionRuntimeError { testcase, err };
+        }
+    };
+    match checker.check(&testcase, &answer).await {
+        Ok(()) => TestResult::Ok,
+        Err(CheckerError::RuntimeError(err)) => TestResult::CheckerError { testcase, err },
+        Err(CheckerError::WrongAnswer(msg)) => TestResult::WrongAnswer { testcase, msg },
+    }
+}
+
 pub async fn run_sequence(
     generator: &Sampler,
     prog: &Solver,
     checker: &dyn Checker,
     niter: usize,
     progress: bool,
-) -> Result<(), TestError> {
+) -> TestResult {
     let bar = match progress {
         true => ProgressBar::new(niter.try_into().unwrap())
             .with_style(ProgressStyle::with_template(PROGRESS_BAR_TEMPLATE).unwrap()),
@@ -69,49 +93,40 @@ pub async fn run_sequence(
             // Sampling, solving and checking are probably not worth the
             // trouble as both generator and program are supposed to be very
             // fast, although it's worth investigating
-            let permit = return_if_cancelled!(
+            let _permit = return_if_cancelled!(
                 fds_semaphore_ref.acquire(),
                 cur_cancel_token.cancelled(),
-                Ok(())
+                TestResult::Ok
             );
-            let sample = generator.sample(cur_seed).await;
-            let testcase = TestCase::new(cur_seed, sample);
-            let answer = prog.solve(&testcase.body).await;
-            let result = checker.check(&testcase, &answer).await;
-            drop(permit);
 
-            if let Err(e) = result {
-                Err(TestError::new(testcase, e))
-            } else {
-                Ok(())
-            }
+            run_one(generator, prog, *checker, cur_seed).await
         });
         seed += 1;
     }
 
     let mut completed: usize = 0;
 
-    let mut result = Ok(());
+    let mut result = TestResult::Ok;
 
     loop {
         match futs.next().await {
             None => {
                 break;
             }
-            Some(Err(e)) => {
-                if let Ok(_) = result {
-                    cancel_token.cancel();
-                    result = Err(e);
-                }
-                // Early printing hack: if we print the result only in main,
-                // we have to wait for all threads to finish.
-                // Maybe change if cancellation works fine.
-            }
-            Some(Ok(_)) => {
+            Some(TestResult::Ok) => {
                 completed += 1;
                 if completed % BAR_STEP == 0 {
                     bar.inc(BAR_STEP as u64);
                 }
+            }
+            Some(x) => {
+                if let TestResult::Ok = result {
+                    cancel_token.cancel();
+                    result = x;
+                }
+                // Early printing hack: if we print the result only in main,
+                // we have to wait for all threads to finish.
+                // Maybe change if cancellation works fine.
             }
         }
     }

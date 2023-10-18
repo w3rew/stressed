@@ -1,5 +1,6 @@
 use crate::communicator::Communicator;
 use crate::utils::SeedType;
+use std::error::Error;
 use std::path::PathBuf;
 
 pub struct Sampler {
@@ -15,13 +16,16 @@ impl Sampler {
         }
     }
 
-    pub async fn sample(&self, seed: SeedType) -> String {
+    pub async fn sample(&self, seed: SeedType) -> Result<String, Box<dyn Error>> {
         let seed_string = seed.to_string();
-        if self.use_stdin {
-            self.c.communicate(Some(&seed_string), None).await
+        let ans = if self.use_stdin {
+            self.c.communicate_result(Some(&seed_string), None).await?
         } else {
-            self.c.communicate(None, Some(&[&seed_string])).await
-        }
+            self.c
+                .communicate_result(None, Some(&[&seed_string]))
+                .await?
+        };
+        Ok(ans)
     }
 }
 
@@ -35,6 +39,7 @@ mod tests {
             let ans = arg_sampler.sample(seed as SeedType).await;
             let correct_ans = format!("{seed}\n");
             let incorrect_ans = format!("{}\n", seed + 1);
+            let ans = ans.unwrap();
             assert_eq!(ans, correct_ans);
             assert_ne!(ans, incorrect_ans);
         }
@@ -45,6 +50,7 @@ mod tests {
         for seed in 0..100 {
             let ans = arg_sampler.sample(seed as SeedType).await;
             let correct_ans = format!("{seed}\n");
+            let ans = ans.unwrap();
             assert_eq!(ans, correct_ans);
         }
     }
