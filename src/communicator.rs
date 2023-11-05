@@ -43,7 +43,7 @@ impl Communicator {
 
         if let Some(input) = input {
             let mut stdin = prog.stdin.take().unwrap();
-            stdin.write(input.as_bytes()).await?;
+            stdin.write_all(input.as_bytes()).await?;
             drop(stdin);
         }
 
