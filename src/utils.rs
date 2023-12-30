@@ -1,6 +1,6 @@
 mod messages;
 
-pub type SeedType = i64;
+pub type SeedType = u64;
 
 pub use messages::{ProgramFailure, TestCase, TestResult, DELIMITER_STR};
 use std::process::{ExitCode, Termination};
